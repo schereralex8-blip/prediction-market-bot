@@ -23,6 +23,7 @@ from .base import (
     name_key,
     normalise_name,
 )
+from .hoopr import HoopRSource
 from .http import FetchError, HttpClient
 from .mlb_statsapi import MlbStatsApiSource
 from .nba_stats import NbaStatsSource
@@ -49,18 +50,20 @@ __all__ = [
 ]
 
 SOURCES: dict[str, dict[str, Callable[..., Any]]] = {
-    "nba": {"nba-stats": NbaStatsSource},
+    "nba": {"hoopr": HoopRSource, "nba-stats": NbaStatsSource},
     "mlb": {"mlb-statsapi": MlbStatsApiSource},
     "nfl": {"nflverse": NflverseSource},
 }
 
 DEFAULT_SOURCE: dict[str, str] = {
-    "nba": "nba-stats",
+    "nba": "hoopr",
     "mlb": "mlb-statsapi",
     "nfl": "nflverse",
 }
 
 SOURCE_NOTES: dict[str, str] = {
+    "hoopr": "sportsdataverse/hoopR release CSVs (ESPN box scores) -- keyless, "
+             "one request per season, reachable from anywhere",
     "nba-stats": "stats.nba.com -- official and complete; rate limits hard and "
                  "often refuses cloud IPs",
     "mlb-statsapi": "statsapi.mlb.com -- official, keyless, hitting and pitching merged",

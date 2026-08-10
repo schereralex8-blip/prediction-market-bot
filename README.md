@@ -211,15 +211,23 @@ One source per sport, because no single free feed covers all three well:
 | sport | source | notes |
 |---|---|---|
 | NFL | [nflverse](https://github.com/nflverse/nflverse-data) | weekly player stats as CSV release assets, joined to the schedule for real dates and venue. No key, no scraping. |
+| NBA | [hoopR](https://github.com/sportsdataverse/sportsdataverse-data) *(default)* | ESPN box scores, one tidy CSV per season, refreshed daily. Reachable from anywhere. |
+| NBA | [stats.nba.com](https://stats.nba.com) | `--source nba-stats`. Official and complete, but rate-limits hard and refuses many networks outright, which is why it isn't the default. |
 | MLB | [MLB Stats API](https://statsapi.mlb.com) | official and keyless. Hitting and pitching are fetched separately and merged per game, so two-way players come out whole. |
-| NBA | [stats.nba.com](https://stats.nba.com) | official and complete. Rate-limits hard and is known to refuse cloud IP ranges — run it from a normal connection. |
+
+All three are free and need no account.
 
 ```bash
 pmbot sources                                          # what's available
 pmbot fetch --sport nfl --player "Josh Allen" --player "CeeDee Lamb"
+pmbot fetch --sport nba --player "Nikola Jokic" --seasons 2024,2025
+pmbot fetch --sport mlb --player "Aaron Judge"
 pmbot fetch --sport nba --from-props                   # everyone on tonight's board
-pmbot fetch --sport mlb --player "Aaron Judge" --seasons 2024,2025
 ```
+
+Seasons are named for the year they **start**, so `--seasons 2024` is the
+2024-25 NBA season. (hoopR files are named for the year a season ends; the
+conversion happens inside the source so you never see it.)
 
 Then check a projection before trusting it:
 
@@ -242,6 +250,10 @@ Details worth knowing:
 * **Ambiguous names stop rather than guess.** There are two Josh Allens; the
   fetch says so and asks for `--team BUF`. Accents and `Jr.` are folded, so
   `Jokić`/`Jokic` and `Witt Jr.`/`Witt` match either way.
+* **DNPs are dropped, and nothing else is.** Getting this wrong is quiet and
+  expensive: ESPN's `active` column is a roster flag rather than an appearance
+  flag, and filtering on it deleted 40% of Anthony Edwards' season while the
+  resulting logs still looked entirely plausible.
 * **Two seasons by default** — enough that an early-season slate has a sample
   behind it without dragging in ancient form. Change with `--seasons`.
 
@@ -308,12 +320,12 @@ pmbot/
   pipeline.py     the scan: odds in, bets or explained passes out
   journal/        SQLite storage, settlement, ROI / CLV / calibration
   providers/      The Odds API client, file-backed providers
-  ingest/         real game logs: nflverse, MLB Stats API, stats.nba.com
+  ingest/         real game logs: nflverse, hoopR, MLB Stats API, stats.nba.com
   cli.py          the command line
 ```
 
-Run the tests with `pytest` (324 of them, no network, ~7s). One opt-in live
-check hits the real nflverse feed: `PMBOT_LIVE_TESTS=1 pytest -k live`.
+Run the tests with `pytest` (338 of them, no network, ~7s). Two opt-in live
+checks hit the real nflverse and hoopR feeds: `PMBOT_LIVE_TESTS=1 pytest -k live`.
 
 ---
 

@@ -31,6 +31,7 @@ from pmbot.ingest.base import (
     normalise_name,
     resolve_one,
 )
+from pmbot.ingest.hoopr import HoopRSource, file_year, played
 from pmbot.ingest.http import FetchError, HttpClient
 from pmbot.ingest.mlb_statsapi import MlbStatsApiSource, innings_to_outs
 from pmbot.ingest.nba_stats import (
@@ -490,6 +491,93 @@ class TestNbaStats:
 
 
 # ==========================================================================
+# NBA / hoopR release CSVs
+# ==========================================================================
+def hoopr_row(**kw):
+    row = {
+        "game_id": "1", "season": "2025", "season_type": "2", "game_date": "2024-10-22",
+        "athlete_id": "4594268", "athlete_display_name": "Anthony Edwards",
+        "athlete_position_abbreviation": "SG", "team_abbreviation": "MIN",
+        "opponent_team_abbreviation": "LAL", "home_away": "away",
+        "minutes": "36.0", "points": "27", "rebounds": "6", "assists": "5",
+        "three_point_field_goals_made": "4", "blocks": "1", "steals": "2", "turnovers": "3",
+        "offensive_rebounds": "1", "defensive_rebounds": "5",
+        "field_goals_attempted": "20", "free_throws_attempted": "6",
+        "did_not_play": "false", "active": "true", "starter": "true",
+    }
+    row.update(kw)
+    return row
+
+
+HOOPR_ROWS = [
+    hoopr_row(),
+    # ESPN marks plenty of played games active=false. It is a roster flag, not
+    # an appearance flag, and filtering on it drops ~40% of a real season.
+    hoopr_row(game_date="2024-10-24", active="false", points="31", home_away="home"),
+    hoopr_row(game_date="2024-10-26", did_not_play="true", minutes="", points=""),
+    hoopr_row(game_date="2025-04-20", season_type="3", points="22"),   # playoffs
+    hoopr_row(game_date="2024-10-05", season_type="1", points="8"),    # preseason
+    hoopr_row(athlete_id="3112335", athlete_display_name="Nikola Jokic",
+              team_abbreviation="DEN", points="35", rebounds="14", assists="11"),
+]
+
+
+def hoopr_source(season_types=("REG", "POST")):
+    client = FakeClient(csv_payloads={"player_box_2025.csv": HOOPR_ROWS})
+    return HoopRSource(client=client, season_types=season_types)
+
+
+class TestHoopR:
+    def test_season_is_labelled_by_its_starting_year(self):
+        """hoopR files are named for the year a season ends; we aren't."""
+        assert file_year(2024) == 2025
+        assert file_year(2025) == 2026
+
+    def test_fields_map_onto_pmbot_markets(self):
+        game = hoopr_source().fetch("Anthony Edwards", [2024]).games[0]
+        assert game["minutes"] == 36.0
+        assert game["points"] == 27
+        assert game["rebounds"] == 6
+        assert game["assists"] == 5
+        assert game["threes"] == 4
+        assert (game["opponent"], game["home"]) == ("LAL", False)
+
+    def test_games_marked_inactive_are_still_games(self):
+        """The regression that silently deleted 40% of a season."""
+        games = hoopr_source().fetch("Anthony Edwards", [2024]).games
+        assert any(g["date"] == "2024-10-24" and g["points"] == 31 for g in games)
+
+    def test_dnps_are_dropped(self):
+        games = hoopr_source().fetch("Anthony Edwards", [2024]).games
+        assert all(g["date"] != "2024-10-26" for g in games)
+        assert all(g["minutes"] > 0 for g in games)
+
+    def test_played_reads_the_right_columns(self):
+        assert played(hoopr_row()) is True
+        assert played(hoopr_row(active="false")) is True
+        assert played(hoopr_row(did_not_play="true")) is False
+        assert played(hoopr_row(minutes="")) is False
+
+    def test_regular_season_and_playoffs_are_kept_preseason_is_not(self):
+        games = hoopr_source().fetch("Anthony Edwards", [2024]).games
+        dates = {g["date"] for g in games}
+        assert "2025-04-20" in dates      # playoffs count
+        assert "2024-10-05" not in dates  # preseason does not
+
+    def test_players_are_kept_apart(self):
+        jokic = hoopr_source().fetch("Nikola Jokic", [2024])
+        assert jokic.ref.source_id == "3112335"
+        assert len(jokic.games) == 1 and jokic.games[0]["rebounds"] == 14
+
+    def test_accented_spellings_find_the_same_player(self):
+        assert hoopr_source().fetch("Nikola Jokić", [2024]).ref.source_id == "3112335"
+
+    def test_games_come_back_oldest_first(self):
+        games = hoopr_source().fetch("Anthony Edwards", [2024]).games
+        assert games == sorted(games, key=lambda g: g["date"])
+
+
+# ==========================================================================
 # storage
 # ==========================================================================
 def fetched(games, source="nflverse", player="Josh Allen"):
@@ -576,9 +664,12 @@ class TestStore:
 
 
 class TestRegistry:
-    @pytest.mark.parametrize("sport,expected", [("nfl", "nflverse"), ("mlb", "mlb-statsapi"), ("nba", "nba-stats")])
+    @pytest.mark.parametrize("sport,expected", [("nfl", "nflverse"), ("mlb", "mlb-statsapi"), ("nba", "hoopr")])
     def test_every_sport_has_a_default_source(self, sport, expected):
         assert build_source(sport).name == expected
+
+    def test_alternative_sources_can_be_asked_for(self):
+        assert build_source("nba", "nba-stats").name == "nba-stats"
 
     def test_unknown_sports_and_sources_are_rejected(self):
         with pytest.raises(KeyError):
@@ -595,13 +686,27 @@ class TestRegistry:
 # ==========================================================================
 # opt-in live check
 # ==========================================================================
-@pytest.mark.skipif(
+live = pytest.mark.skipif(
     os.environ.get("PMBOT_LIVE_TESTS") != "1",
-    reason="set PMBOT_LIVE_TESTS=1 to hit the real nflverse feed",
+    reason="set PMBOT_LIVE_TESTS=1 to hit the real feeds",
 )
+
+
+@live
 def test_live_nflverse_fetch(tmp_path):
     source = build_source("nfl", client=HttpClient(cache_dir=tmp_path))
     logs = source.fetch("Josh Allen", [2024])
     assert len(logs.games) > 10
     assert all(g["pass_attempts"] >= 0 for g in logs.games)
     assert logs.ref.team == "BUF"
+
+
+@live
+def test_live_hoopr_fetch(tmp_path):
+    source = build_source("nba", client=HttpClient(cache_dir=tmp_path))
+    logs = source.fetch("Anthony Edwards", [2024])
+    # A full season plus playoffs; anything near 55 means the DNP filter has
+    # started eating real games again.
+    assert len(logs.games) > 80
+    assert logs.ref.team == "MIN"
+    assert 20 < sum(g["points"] for g in logs.games) / len(logs.games) < 35
