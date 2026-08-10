@@ -172,7 +172,12 @@ class LocalGameLogProvider:
                 team=g.get("team", team),
                 opponent=g.get("opponent", ""),
                 is_home=bool(g.get("home", True)),
-                stats={k: float(v) for k, v in g.items() if isinstance(v, (int, float))},
+                stats={
+                    k: float(v)
+                    for k, v in g.items()
+                    # bool is an int in Python; "home": true is not a stat
+                    if isinstance(v, (int, float)) and not isinstance(v, bool)
+                },
             )
             for g in payload.get("games", [])
         ]

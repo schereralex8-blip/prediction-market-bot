@@ -2,6 +2,7 @@
  "player": "Zack Wheeler",
  "team": "PHI",
  "sport": "mlb",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",

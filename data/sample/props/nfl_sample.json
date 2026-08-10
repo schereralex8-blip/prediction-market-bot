@@ -3,7 +3,7 @@
  "events": [
   {
    "id": "nfl-kc-lv",
-   "commence_time": "2026-08-11T04:00:19Z",
+   "commence_time": "2026-08-11T04:27:26Z",
    "home_team": "LV",
    "away_team": "KC",
    "props": [
@@ -15,33 +15,33 @@
      "books": [
       {
        "book": "pinnacle",
-       "line": 253.5,
-       "over": -115,
-       "under": -105
+       "line": 256.5,
+       "over": -105,
+       "under": -115
       },
       {
        "book": "draftkings",
-       "line": 253.5,
-       "over": -110,
-       "under": -110
+       "line": 256.5,
+       "over": -100,
+       "under": -115
       },
       {
        "book": "fanduel",
-       "line": 253.5,
-       "over": -115,
-       "under": -105
+       "line": 256.5,
+       "over": -105,
+       "under": -115
       },
       {
        "book": "betmgm",
-       "line": 253.5,
-       "over": -105,
-       "under": -110
+       "line": 256.5,
+       "over": 100,
+       "under": -120
       },
       {
        "book": "caesars",
-       "line": 253.5,
-       "over": -105,
-       "under": -115
+       "line": 256.5,
+       "over": 100,
+       "under": -120
       }
      ]
     }
@@ -49,7 +49,7 @@
   },
   {
    "id": "nfl-buf-mia",
-   "commence_time": "2026-08-11T06:00:19Z",
+   "commence_time": "2026-08-11T06:27:26Z",
    "home_team": "MIA",
    "away_team": "BUF",
    "props": [
@@ -61,33 +61,33 @@
      "books": [
       {
        "book": "pinnacle",
-       "line": 236.5,
+       "line": 235.5,
        "over": 110,
-       "under": -135
+       "under": -130
       },
       {
        "book": "draftkings",
-       "line": 236.5,
+       "line": 235.5,
        "over": 150,
-       "under": -185
+       "under": -180
       },
       {
        "book": "fanduel",
-       "line": 236.5,
-       "over": 125,
-       "under": -150
-      },
-      {
-       "book": "betmgm",
-       "line": 236.5,
+       "line": 235.5,
        "over": 120,
        "under": -145
       },
       {
-       "book": "caesars",
-       "line": 236.5,
+       "book": "betmgm",
+       "line": 235.5,
        "over": 115,
-       "under": -135
+       "under": -140
+      },
+      {
+       "book": "caesars",
+       "line": 235.5,
+       "over": 110,
+       "under": -130
       }
      ]
     }
@@ -95,7 +95,7 @@
   },
   {
    "id": "nfl-dal-phi",
-   "commence_time": "2026-08-11T08:00:19Z",
+   "commence_time": "2026-08-11T08:27:26Z",
    "home_team": "PHI",
    "away_team": "DAL",
    "props": [
@@ -141,7 +141,7 @@
   },
   {
    "id": "nfl-atl-tb",
-   "commence_time": "2026-08-11T10:00:19Z",
+   "commence_time": "2026-08-11T10:27:26Z",
    "home_team": "TB",
    "away_team": "ATL",
    "props": [
@@ -153,33 +153,33 @@
      "books": [
       {
        "book": "pinnacle",
-       "line": 75.5,
-       "over": -105,
-       "under": -115
+       "line": 76.5,
+       "over": -100,
+       "under": -120
       },
       {
        "book": "draftkings",
-       "line": 75.5,
-       "over": -105,
-       "under": -115
+       "line": 76.5,
+       "over": 100,
+       "under": -120
       },
       {
        "book": "fanduel",
-       "line": 75.5,
+       "line": 76.5,
+       "over": -115,
+       "under": -105
+      },
+      {
+       "book": "betmgm",
+       "line": 76.5,
        "over": -115,
        "under": -100
       },
       {
-       "book": "betmgm",
-       "line": 75.5,
-       "over": -120,
-       "under": 100
-      },
-      {
        "book": "caesars",
-       "line": 75.5,
-       "over": -115,
-       "under": -105
+       "line": 76.5,
+       "over": -110,
+       "under": -110
       }
      ]
     }

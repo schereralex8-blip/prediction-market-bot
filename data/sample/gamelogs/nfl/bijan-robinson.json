@@ -2,33 +2,34 @@
  "player": "Bijan Robinson",
  "team": "ATL",
  "sport": "nfl",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",
    "opponent": "GSW",
    "home": false,
    "rush_attempts": 16,
-   "rush_yards": 74,
+   "rush_yards": 75,
    "targets": 2,
    "receptions": 2,
-   "receiving_yards": 27
+   "receiving_yards": 33
   },
   {
    "date": "2026-03-31",
    "opponent": "MIA",
    "home": true,
    "rush_attempts": 19,
-   "rush_yards": 72,
+   "rush_yards": 56,
    "targets": 3,
    "receptions": 3,
-   "receiving_yards": 7
+   "receiving_yards": 0
   },
   {
    "date": "2026-04-03",
    "opponent": "PHX",
    "home": false,
    "rush_attempts": 17,
-   "rush_yards": 68,
+   "rush_yards": 58,
    "targets": 1,
    "receptions": 0,
    "receiving_yards": 0
@@ -38,100 +39,100 @@
    "opponent": "LAL",
    "home": true,
    "rush_attempts": 28,
-   "rush_yards": 115,
+   "rush_yards": 100,
    "targets": 3,
    "receptions": 3,
-   "receiving_yards": 18
+   "receiving_yards": 16
   },
   {
    "date": "2026-04-09",
    "opponent": "DEN",
    "home": false,
    "rush_attempts": 18,
-   "rush_yards": 99,
+   "rush_yards": 117,
    "targets": 5,
    "receptions": 4,
-   "receiving_yards": 43
+   "receiving_yards": 49
   },
   {
    "date": "2026-04-12",
    "opponent": "BOS",
    "home": true,
    "rush_attempts": 20,
-   "rush_yards": 75,
+   "rush_yards": 57,
    "targets": 3,
    "receptions": 3,
-   "receiving_yards": 20
+   "receiving_yards": 19
   },
   {
    "date": "2026-04-15",
    "opponent": "CLE",
    "home": false,
    "rush_attempts": 21,
-   "rush_yards": 120,
+   "rush_yards": 148,
    "targets": 8,
    "receptions": 8,
-   "receiving_yards": 53
+   "receiving_yards": 49
   },
   {
    "date": "2026-04-18",
    "opponent": "NYK",
    "home": true,
    "rush_attempts": 17,
-   "rush_yards": 79,
+   "rush_yards": 82,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 20
+   "receiving_yards": 15
   },
   {
    "date": "2026-04-21",
    "opponent": "DAL",
    "home": false,
    "rush_attempts": 21,
-   "rush_yards": 78,
+   "rush_yards": 59,
    "targets": 5,
    "receptions": 2,
-   "receiving_yards": 18
+   "receiving_yards": 19
   },
   {
    "date": "2026-04-24",
    "opponent": "OKC",
    "home": true,
    "rush_attempts": 21,
-   "rush_yards": 92,
+   "rush_yards": 89,
    "targets": 7,
    "receptions": 2,
-   "receiving_yards": 19
+   "receiving_yards": 21
   },
   {
    "date": "2026-04-27",
    "opponent": "GSW",
    "home": false,
    "rush_attempts": 14,
-   "rush_yards": 80,
+   "rush_yards": 98,
    "targets": 1,
    "receptions": 1,
-   "receiving_yards": 6
+   "receiving_yards": 5
   },
   {
    "date": "2026-04-30",
    "opponent": "MIA",
    "home": true,
    "rush_attempts": 20,
-   "rush_yards": 105,
+   "rush_yards": 121,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 25
+   "receiving_yards": 22
   },
   {
    "date": "2026-05-03",
    "opponent": "PHX",
    "home": false,
    "rush_attempts": 19,
-   "rush_yards": 93,
+   "rush_yards": 100,
    "targets": 7,
    "receptions": 6,
-   "receiving_yards": 61
+   "receiving_yards": 68
   },
   {
    "date": "2026-05-06",
@@ -141,14 +142,14 @@
    "rush_yards": 74,
    "targets": 8,
    "receptions": 4,
-   "receiving_yards": 52
+   "receiving_yards": 64
   },
   {
    "date": "2026-05-09",
    "opponent": "DEN",
    "home": false,
    "rush_attempts": 12,
-   "rush_yards": 62,
+   "rush_yards": 71,
    "targets": 4,
    "receptions": 2,
    "receiving_yards": 15
@@ -158,7 +159,7 @@
    "opponent": "BOS",
    "home": true,
    "rush_attempts": 18,
-   "rush_yards": 95,
+   "rush_yards": 109,
    "targets": 2,
    "receptions": 1,
    "receiving_yards": 0
@@ -168,47 +169,47 @@
    "opponent": "CLE",
    "home": false,
    "rush_attempts": 13,
-   "rush_yards": 82,
+   "rush_yards": 107,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 22
+   "receiving_yards": 17
   },
   {
    "date": "2026-05-18",
    "opponent": "NYK",
    "home": true,
    "rush_attempts": 19,
-   "rush_yards": 72,
+   "rush_yards": 56,
    "targets": 7,
    "receptions": 6,
-   "receiving_yards": 47
+   "receiving_yards": 48
   },
   {
    "date": "2026-05-21",
    "opponent": "DAL",
    "home": false,
    "rush_attempts": 15,
-   "rush_yards": 70,
+   "rush_yards": 72,
    "targets": 4,
    "receptions": 2,
-   "receiving_yards": 11
+   "receiving_yards": 8
   },
   {
    "date": "2026-05-24",
    "opponent": "OKC",
    "home": true,
    "rush_attempts": 21,
-   "rush_yards": 114,
+   "rush_yards": 135,
    "targets": 6,
    "receptions": 4,
-   "receiving_yards": 19
+   "receiving_yards": 13
   },
   {
    "date": "2026-05-27",
    "opponent": "GSW",
    "home": false,
    "rush_attempts": 13,
-   "rush_yards": 70,
+   "rush_yards": 83,
    "targets": 6,
    "receptions": 5,
    "receiving_yards": 38
@@ -218,20 +219,20 @@
    "opponent": "MIA",
    "home": true,
    "rush_attempts": 22,
-   "rush_yards": 111,
+   "rush_yards": 123,
    "targets": 3,
    "receptions": 2,
-   "receiving_yards": 20
+   "receiving_yards": 23
   },
   {
    "date": "2026-06-02",
    "opponent": "PHX",
    "home": false,
    "rush_attempts": 24,
-   "rush_yards": 114,
+   "rush_yards": 120,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 19
+   "receiving_yards": 14
   },
   {
    "date": "2026-06-05",
@@ -241,17 +242,17 @@
    "rush_yards": 59,
    "targets": 4,
    "receptions": 3,
-   "receiving_yards": 3
+   "receiving_yards": 0
   },
   {
    "date": "2026-06-08",
    "opponent": "DEN",
    "home": false,
    "rush_attempts": 19,
-   "rush_yards": 96,
+   "rush_yards": 107,
    "targets": 4,
    "receptions": 3,
-   "receiving_yards": 17
+   "receiving_yards": 14
   },
   {
    "date": "2026-06-11",
@@ -261,34 +262,34 @@
    "rush_yards": 86,
    "targets": 3,
    "receptions": 3,
-   "receiving_yards": 31
+   "receiving_yards": 36
   },
   {
    "date": "2026-06-14",
    "opponent": "CLE",
    "home": false,
    "rush_attempts": 19,
-   "rush_yards": 85,
+   "rush_yards": 83,
    "targets": 5,
    "receptions": 4,
-   "receiving_yards": 40
+   "receiving_yards": 45
   },
   {
    "date": "2026-06-17",
    "opponent": "NYK",
    "home": true,
    "rush_attempts": 13,
-   "rush_yards": 46,
+   "rush_yards": 31,
    "targets": 4,
    "receptions": 3,
-   "receiving_yards": 17
+   "receiving_yards": 14
   },
   {
    "date": "2026-06-20",
    "opponent": "DAL",
    "home": false,
    "rush_attempts": 18,
-   "rush_yards": 92,
+   "rush_yards": 103,
    "targets": 4,
    "receptions": 1,
    "receiving_yards": 7
@@ -298,127 +299,127 @@
    "opponent": "OKC",
    "home": true,
    "rush_attempts": 15,
-   "rush_yards": 51,
+   "rush_yards": 31,
    "targets": 2,
    "receptions": 2,
-   "receiving_yards": 12
+   "receiving_yards": 10
   },
   {
    "date": "2026-06-26",
    "opponent": "GSW",
    "home": false,
    "rush_attempts": 16,
-   "rush_yards": 67,
+   "rush_yards": 59,
    "targets": 8,
    "receptions": 6,
-   "receiving_yards": 55
+   "receiving_yards": 60
   },
   {
    "date": "2026-06-29",
    "opponent": "MIA",
    "home": true,
    "rush_attempts": 9,
-   "rush_yards": 39,
+   "rush_yards": 37,
    "targets": 3,
    "receptions": 2,
-   "receiving_yards": 15
+   "receiving_yards": 14
   },
   {
    "date": "2026-07-02",
    "opponent": "PHX",
    "home": false,
    "rush_attempts": 24,
-   "rush_yards": 98,
+   "rush_yards": 85,
    "targets": 4,
    "receptions": 3,
-   "receiving_yards": 18
+   "receiving_yards": 16
   },
   {
    "date": "2026-07-05",
    "opponent": "LAL",
    "home": true,
    "rush_attempts": 13,
-   "rush_yards": 60,
+   "rush_yards": 61,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 44
+   "receiving_yards": 51
   },
   {
    "date": "2026-07-08",
    "opponent": "DEN",
    "home": false,
    "rush_attempts": 19,
-   "rush_yards": 86,
+   "rush_yards": 85,
    "targets": 3,
    "receptions": 2,
-   "receiving_yards": 23
+   "receiving_yards": 26
   },
   {
    "date": "2026-07-11",
    "opponent": "BOS",
    "home": true,
    "rush_attempts": 19,
-   "rush_yards": 89,
+   "rush_yards": 92,
    "targets": 6,
    "receptions": 5,
-   "receiving_yards": 51
+   "receiving_yards": 57
   },
   {
    "date": "2026-07-14",
    "opponent": "CLE",
    "home": false,
    "rush_attempts": 17,
-   "rush_yards": 84,
+   "rush_yards": 92,
    "targets": 4,
    "receptions": 3,
-   "receiving_yards": 20
+   "receiving_yards": 19
   },
   {
    "date": "2026-07-17",
    "opponent": "NYK",
    "home": true,
    "rush_attempts": 25,
-   "rush_yards": 121,
+   "rush_yards": 130,
    "targets": 4,
    "receptions": 4,
-   "receiving_yards": 21
+   "receiving_yards": 16
   },
   {
    "date": "2026-07-20",
    "opponent": "DAL",
    "home": false,
    "rush_attempts": 22,
-   "rush_yards": 78,
+   "rush_yards": 52,
    "targets": 6,
    "receptions": 5,
-   "receiving_yards": 20
+   "receiving_yards": 11
   },
   {
    "date": "2026-07-23",
    "opponent": "OKC",
    "home": true,
    "rush_attempts": 20,
-   "rush_yards": 84,
+   "rush_yards": 77,
    "targets": 3,
    "receptions": 2,
-   "receiving_yards": 8
+   "receiving_yards": 4
   },
   {
    "date": "2026-07-26",
    "opponent": "GSW",
    "home": false,
    "rush_attempts": 24,
-   "rush_yards": 94,
+   "rush_yards": 77,
    "targets": 6,
    "receptions": 4,
-   "receiving_yards": 36
+   "receiving_yards": 39
   },
   {
    "date": "2026-07-29",
    "opponent": "MIA",
    "home": true,
    "rush_attempts": 19,
-   "rush_yards": 75,
+   "rush_yards": 61,
    "targets": 4,
    "receptions": 4,
    "receiving_yards": 31
@@ -428,40 +429,40 @@
    "opponent": "PHX",
    "home": false,
    "rush_attempts": 18,
-   "rush_yards": 94,
+   "rush_yards": 108,
    "targets": 6,
    "receptions": 5,
-   "receiving_yards": 36
+   "receiving_yards": 35
   },
   {
    "date": "2026-08-04",
    "opponent": "LAL",
    "home": true,
    "rush_attempts": 12,
-   "rush_yards": 70,
+   "rush_yards": 87,
    "targets": 4,
    "receptions": 2,
-   "receiving_yards": 10
+   "receiving_yards": 8
   },
   {
    "date": "2026-08-07",
    "opponent": "DEN",
    "home": false,
    "rush_attempts": 12,
-   "rush_yards": 67,
+   "rush_yards": 81,
    "targets": 3,
    "receptions": 3,
-   "receiving_yards": 14
+   "receiving_yards": 9
   },
   {
    "date": "2026-08-10",
    "opponent": "BOS",
    "home": true,
    "rush_attempts": 18,
-   "rush_yards": 98,
+   "rush_yards": 117,
    "targets": 7,
    "receptions": 4,
-   "receiving_yards": 12
+   "receiving_yards": 3
   }
  ]
 }

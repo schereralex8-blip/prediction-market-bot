@@ -1,0 +1,76 @@
+{
+ "nba": {
+  "home_factor": 1.01,
+  "pace": {
+   "SAC": 1.03,
+   "IND": 1.025,
+   "MIN": 0.975,
+   "ORL": 0.965,
+   "CHI": 1.005,
+   "NYK": 0.985
+  },
+  "markets": {
+   "player_points": {
+    "MIN": 0.955,
+    "ORL": 0.965,
+    "SAC": 1.035,
+    "CHI": 1.02,
+    "IND": 1.015
+   },
+   "player_rebounds": {
+    "MIN": 0.98,
+    "SAC": 1.01,
+    "CHI": 1.005
+   },
+   "player_assists": {
+    "MIN": 0.975,
+    "CHI": 1.015,
+    "ORL": 0.98
+   },
+   "player_points_rebounds_assists": {
+    "MIN": 0.97,
+    "SAC": 1.02
+   }
+  }
+ },
+ "mlb": {
+  "home_factor": 1.008,
+  "pace": {},
+  "markets": {
+   "pitcher_strikeouts": {
+    "CLE": 0.96,
+    "ATL": 1.02,
+    "MIN": 0.985
+   },
+   "batter_total_bases": {
+    "BOS": 1.03,
+    "MIN": 0.975
+   },
+   "batter_hits": {
+    "MIN": 0.985,
+    "BOS": 1.02
+   }
+  }
+ },
+ "nfl": {
+  "home_factor": 1.012,
+  "pace": {
+   "LV": 1.01,
+   "MIA": 1.02,
+   "PHI": 0.975,
+   "TB": 0.995
+  },
+  "markets": {
+   "player_pass_yds": {
+    "LV": 1.035,
+    "MIA": 1.01
+   },
+   "player_receptions": {
+    "PHI": 0.955
+   },
+   "player_rush_yds": {
+    "TB": 0.93
+   }
+  }
+ }
+}

@@ -17,6 +17,7 @@ from pmbot.types import BookLine, PropMarket
 @pytest.fixture
 def settings():
     s = Settings()
+    s.data.use_sample()
     s.models = ModelSettings(mc_sims=6000)
     s.staking.bankroll = 10_000
     return s

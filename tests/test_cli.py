@@ -11,7 +11,8 @@ def db(tmp_path):
 
 
 def run(capsys, *args):
-    code = main(list(args))
+    """Every CLI test runs against the synthetic slate, never fetched data."""
+    code = main(["--sample", *args])
     return code, capsys.readouterr().out
 
 
@@ -185,6 +186,25 @@ class TestJournalCommands:
         run(capsys, "--db", db, "bankroll", "--deposit", "250")
         _, out = run(capsys, "--db", db, "bankroll", "--withdraw", "100", "--json")
         assert json.loads(out)["balance"] == 150
+
+
+class TestFetch:
+    def test_sources_are_listed_with_a_default_each(self, capsys):
+        code, out = run(capsys, "sources")
+        assert code == 0
+        for expected in ("NBA", "MLB", "NFL", "nflverse", "mlb-statsapi", "nba-stats"):
+            assert expected in out
+
+    def test_fetch_refuses_to_overwrite_the_shipped_fixture(self, capsys):
+        """--sample plus fetch would replace synthetic logs with real ones."""
+        code, out = run(capsys, "fetch", "--sport", "nfl", "--player", "Josh Allen")
+        assert code == 2
+        assert "refusing" in out and "data/gamelogs" in out
+
+    def test_fetch_needs_someone_to_fetch(self, capsys, tmp_path):
+        code, out = main(["fetch", "--sport", "nfl"]), capsys.readouterr().out
+        assert code == 2
+        assert "--player" in out and "--from-props" in out
 
 
 class TestErrors:

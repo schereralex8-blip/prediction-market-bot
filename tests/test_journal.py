@@ -186,7 +186,7 @@ class TestClosingLineValue:
         from pmbot.providers import LocalOddsProvider
 
         place(journal, player="Anthony Edwards", market="player_points", line=27.5, american=165)
-        props = LocalOddsProvider("data/props").player_props("nba", ["player_points"])
+        props = LocalOddsProvider("data/sample/props").player_props("nba", ["player_points"])
         # Line the bet up with whatever the fixture actually quotes.
         target = next(p for p in props if p.player == "Anthony Edwards")
         journal.conn.execute("UPDATE bets SET line = ?", (target.books[0].line,))

@@ -15,3 +15,8 @@ pmbot.config.json
 
 # cached API responses
 .cache/
+
+# fetched game logs are yours, not the repo's -- run `pmbot fetch` to build them.
+# The synthetic fixture under data/sample/ is checked in on purpose.
+/data/gamelogs/*
+!/data/gamelogs/.gitkeep

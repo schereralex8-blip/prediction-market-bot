@@ -2,6 +2,7 @@
  "player": "Tyrese Haliburton",
  "team": "IND",
  "sport": "nba",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",

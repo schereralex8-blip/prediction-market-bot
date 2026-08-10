@@ -2,6 +2,7 @@
  "player": "Patrick Mahomes",
  "team": "KC",
  "sport": "nfl",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",
@@ -9,7 +10,7 @@
    "home": false,
    "pass_attempts": 35,
    "completions": 24,
-   "pass_yards": 242,
+   "pass_yards": 227,
    "pass_tds": 1,
    "rush_attempts": 3,
    "rush_yards": 47
@@ -20,7 +21,7 @@
    "home": true,
    "pass_attempts": 25,
    "completions": 17,
-   "pass_yards": 184,
+   "pass_yards": 195,
    "pass_tds": 0,
    "rush_attempts": 0,
    "rush_yards": 15
@@ -31,7 +32,7 @@
    "home": false,
    "pass_attempts": 37,
    "completions": 19,
-   "pass_yards": 277,
+   "pass_yards": 302,
    "pass_tds": 2,
    "rush_attempts": 2,
    "rush_yards": 25
@@ -42,7 +43,7 @@
    "home": true,
    "pass_attempts": 39,
    "completions": 27,
-   "pass_yards": 277,
+   "pass_yards": 273,
    "pass_tds": 3,
    "rush_attempts": 7,
    "rush_yards": 39
@@ -53,7 +54,7 @@
    "home": false,
    "pass_attempts": 36,
    "completions": 23,
-   "pass_yards": 252,
+   "pass_yards": 242,
    "pass_tds": 1,
    "rush_attempts": 5,
    "rush_yards": 5
@@ -64,7 +65,7 @@
    "home": true,
    "pass_attempts": 35,
    "completions": 25,
-   "pass_yards": 248,
+   "pass_yards": 243,
    "pass_tds": 4,
    "rush_attempts": 6,
    "rush_yards": 25
@@ -75,7 +76,7 @@
    "home": false,
    "pass_attempts": 30,
    "completions": 20,
-   "pass_yards": 246,
+   "pass_yards": 306,
    "pass_tds": 5,
    "rush_attempts": 4,
    "rush_yards": 23
@@ -86,7 +87,7 @@
    "home": true,
    "pass_attempts": 38,
    "completions": 29,
-   "pass_yards": 272,
+   "pass_yards": 273,
    "pass_tds": 2,
    "rush_attempts": 2,
    "rush_yards": 23
@@ -108,7 +109,7 @@
    "home": true,
    "pass_attempts": 31,
    "completions": 20,
-   "pass_yards": 215,
+   "pass_yards": 204,
    "pass_tds": 2,
    "rush_attempts": 0,
    "rush_yards": 31
@@ -119,7 +120,7 @@
    "home": false,
    "pass_attempts": 39,
    "completions": 26,
-   "pass_yards": 285,
+   "pass_yards": 297,
    "pass_tds": 1,
    "rush_attempts": 3,
    "rush_yards": -5
@@ -130,7 +131,7 @@
    "home": true,
    "pass_attempts": 29,
    "completions": 19,
-   "pass_yards": 191,
+   "pass_yards": 160,
    "pass_tds": 2,
    "rush_attempts": 2,
    "rush_yards": 19
@@ -141,7 +142,7 @@
    "home": false,
    "pass_attempts": 32,
    "completions": 23,
-   "pass_yards": 206,
+   "pass_yards": 163,
    "pass_tds": 1,
    "rush_attempts": 4,
    "rush_yards": 10
@@ -152,7 +153,7 @@
    "home": true,
    "pass_attempts": 29,
    "completions": 23,
-   "pass_yards": 219,
+   "pass_yards": 242,
    "pass_tds": 2,
    "rush_attempts": 4,
    "rush_yards": 25
@@ -163,7 +164,7 @@
    "home": false,
    "pass_attempts": 35,
    "completions": 18,
-   "pass_yards": 246,
+   "pass_yards": 237,
    "pass_tds": 3,
    "rush_attempts": 2,
    "rush_yards": -4
@@ -174,7 +175,7 @@
    "home": true,
    "pass_attempts": 45,
    "completions": 25,
-   "pass_yards": 351,
+   "pass_yards": 406,
    "pass_tds": 1,
    "rush_attempts": 0,
    "rush_yards": 11
@@ -185,7 +186,7 @@
    "home": false,
    "pass_attempts": 29,
    "completions": 21,
-   "pass_yards": 197,
+   "pass_yards": 177,
    "pass_tds": 1,
    "rush_attempts": 6,
    "rush_yards": 9
@@ -196,7 +197,7 @@
    "home": true,
    "pass_attempts": 44,
    "completions": 29,
-   "pass_yards": 307,
+   "pass_yards": 293,
    "pass_tds": 1,
    "rush_attempts": 5,
    "rush_yards": 35
@@ -207,7 +208,7 @@
    "home": false,
    "pass_attempts": 26,
    "completions": 14,
-   "pass_yards": 199,
+   "pass_yards": 224,
    "pass_tds": 3,
    "rush_attempts": 0,
    "rush_yards": 20
@@ -218,7 +219,7 @@
    "home": true,
    "pass_attempts": 33,
    "completions": 22,
-   "pass_yards": 239,
+   "pass_yards": 246,
    "pass_tds": 1,
    "rush_attempts": 4,
    "rush_yards": 12
@@ -229,7 +230,7 @@
    "home": false,
    "pass_attempts": 34,
    "completions": 26,
-   "pass_yards": 249,
+   "pass_yards": 261,
    "pass_tds": 2,
    "rush_attempts": 3,
    "rush_yards": 3
@@ -240,7 +241,7 @@
    "home": true,
    "pass_attempts": 40,
    "completions": 25,
-   "pass_yards": 285,
+   "pass_yards": 284,
    "pass_tds": 1,
    "rush_attempts": 1,
    "rush_yards": 15
@@ -251,7 +252,7 @@
    "home": false,
    "pass_attempts": 34,
    "completions": 25,
-   "pass_yards": 275,
+   "pass_yards": 336,
    "pass_tds": 1,
    "rush_attempts": 0,
    "rush_yards": 10
@@ -262,7 +263,7 @@
    "home": true,
    "pass_attempts": 31,
    "completions": 22,
-   "pass_yards": 224,
+   "pass_yards": 228,
    "pass_tds": 1,
    "rush_attempts": 2,
    "rush_yards": 21
@@ -273,7 +274,7 @@
    "home": false,
    "pass_attempts": 27,
    "completions": 17,
-   "pass_yards": 193,
+   "pass_yards": 192,
    "pass_tds": 3,
    "rush_attempts": 4,
    "rush_yards": -2
@@ -284,7 +285,7 @@
    "home": true,
    "pass_attempts": 34,
    "completions": 27,
-   "pass_yards": 239,
+   "pass_yards": 231,
    "pass_tds": 2,
    "rush_attempts": 5,
    "rush_yards": 29
@@ -295,7 +296,7 @@
    "home": false,
    "pass_attempts": 35,
    "completions": 22,
-   "pass_yards": 241,
+   "pass_yards": 224,
    "pass_tds": 3,
    "rush_attempts": 4,
    "rush_yards": 47
@@ -306,7 +307,7 @@
    "home": true,
    "pass_attempts": 32,
    "completions": 25,
-   "pass_yards": 233,
+   "pass_yards": 242,
    "pass_tds": 0,
    "rush_attempts": 3,
    "rush_yards": 22
@@ -317,7 +318,7 @@
    "home": false,
    "pass_attempts": 38,
    "completions": 25,
-   "pass_yards": 292,
+   "pass_yards": 331,
    "pass_tds": 3,
    "rush_attempts": 6,
    "rush_yards": 2
@@ -328,7 +329,7 @@
    "home": true,
    "pass_attempts": 44,
    "completions": 32,
-   "pass_yards": 312,
+   "pass_yards": 308,
    "pass_tds": 5,
    "rush_attempts": 4,
    "rush_yards": -5
@@ -339,7 +340,7 @@
    "home": false,
    "pass_attempts": 41,
    "completions": 29,
-   "pass_yards": 290,
+   "pass_yards": 284,
    "pass_tds": 2,
    "rush_attempts": 4,
    "rush_yards": 22
@@ -350,7 +351,7 @@
    "home": true,
    "pass_attempts": 42,
    "completions": 25,
-   "pass_yards": 308,
+   "pass_yards": 324,
    "pass_tds": 3,
    "rush_attempts": 3,
    "rush_yards": 10
@@ -361,7 +362,7 @@
    "home": false,
    "pass_attempts": 33,
    "completions": 20,
-   "pass_yards": 251,
+   "pass_yards": 280,
    "pass_tds": 0,
    "rush_attempts": 7,
    "rush_yards": -1
@@ -372,7 +373,7 @@
    "home": true,
    "pass_attempts": 35,
    "completions": 27,
-   "pass_yards": 252,
+   "pass_yards": 256,
    "pass_tds": 2,
    "rush_attempts": 4,
    "rush_yards": 33
@@ -383,7 +384,7 @@
    "home": false,
    "pass_attempts": 29,
    "completions": 12,
-   "pass_yards": 186,
+   "pass_yards": 146,
    "pass_tds": 2,
    "rush_attempts": 6,
    "rush_yards": 26
@@ -394,7 +395,7 @@
    "home": true,
    "pass_attempts": 32,
    "completions": 24,
-   "pass_yards": 216,
+   "pass_yards": 191,
    "pass_tds": 2,
    "rush_attempts": 5,
    "rush_yards": 1
@@ -405,7 +406,7 @@
    "home": false,
    "pass_attempts": 33,
    "completions": 22,
-   "pass_yards": 243,
+   "pass_yards": 256,
    "pass_tds": 2,
    "rush_attempts": 2,
    "rush_yards": 2
@@ -416,7 +417,7 @@
    "home": true,
    "pass_attempts": 26,
    "completions": 18,
-   "pass_yards": 185,
+   "pass_yards": 182,
    "pass_tds": 0,
    "rush_attempts": 6,
    "rush_yards": 19
@@ -427,7 +428,7 @@
    "home": false,
    "pass_attempts": 32,
    "completions": 26,
-   "pass_yards": 210,
+   "pass_yards": 173,
    "pass_tds": 0,
    "rush_attempts": 4,
    "rush_yards": 12
@@ -438,7 +439,7 @@
    "home": true,
    "pass_attempts": 41,
    "completions": 25,
-   "pass_yards": 298,
+   "pass_yards": 307,
    "pass_tds": 0,
    "rush_attempts": 0,
    "rush_yards": 9
@@ -449,7 +450,7 @@
    "home": false,
    "pass_attempts": 40,
    "completions": 28,
-   "pass_yards": 292,
+   "pass_yards": 304,
    "pass_tds": 2,
    "rush_attempts": 6,
    "rush_yards": 22
@@ -460,7 +461,7 @@
    "home": true,
    "pass_attempts": 32,
    "completions": 16,
-   "pass_yards": 234,
+   "pass_yards": 243,
    "pass_tds": 0,
    "rush_attempts": 1,
    "rush_yards": 17
@@ -471,7 +472,7 @@
    "home": false,
    "pass_attempts": 31,
    "completions": 24,
-   "pass_yards": 217,
+   "pass_yards": 208,
    "pass_tds": 1,
    "rush_attempts": 6,
    "rush_yards": 18
@@ -482,7 +483,7 @@
    "home": true,
    "pass_attempts": 33,
    "completions": 22,
-   "pass_yards": 239,
+   "pass_yards": 244,
    "pass_tds": 5,
    "rush_attempts": 0,
    "rush_yards": 25
@@ -493,7 +494,7 @@
    "home": false,
    "pass_attempts": 33,
    "completions": 18,
-   "pass_yards": 244,
+   "pass_yards": 259,
    "pass_tds": 3,
    "rush_attempts": 5,
    "rush_yards": 15
@@ -504,7 +505,7 @@
    "home": true,
    "pass_attempts": 29,
    "completions": 20,
-   "pass_yards": 196,
+   "pass_yards": 173,
    "pass_tds": 0,
    "rush_attempts": 3,
    "rush_yards": 20

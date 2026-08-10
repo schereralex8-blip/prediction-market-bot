@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 from dataclasses import asdict
 from datetime import datetime, timezone
 from typing import Any, Sequence
@@ -446,6 +447,94 @@ def cmd_snapshot(args: argparse.Namespace, settings: Settings) -> int:
     return 0
 
 
+def cmd_fetch(args: argparse.Namespace, settings: Settings) -> int:
+    """Pull real game logs and write them where the models look for them."""
+    from .ingest import (
+        AmbiguousPlayer,
+        FetchError,
+        HttpClient,
+        UnknownPlayer,
+        build_source,
+        default_seasons,
+        write_logs,
+    )
+
+    if "sample" in Path(settings.data.gamelogs).parts:
+        print(
+            "refusing to write fetched logs into the synthetic fixture "
+            f"({settings.data.gamelogs}).\n"
+            "Drop --sample: real logs belong in data/gamelogs, and mixing the two "
+            "produces enormous imaginary edges."
+        )
+        return 2
+
+    players = list(args.player or [])
+    if args.from_props:
+        provider = build_odds_provider(settings)
+        props = provider.player_props(args.sport, market_keys(args.sport))
+        players.extend(sorted({p.player for p in props}))
+    if not players:
+        print("give --player NAME (repeatable) or --from-props to take tonight's board")
+        return 2
+
+    seasons = (
+        [int(s) for s in args.seasons.split(",")]
+        if args.seasons
+        else default_seasons(args.sport, args.season_count)
+    )
+    client = HttpClient(cache_dir=args.cache or ".cache/ingest", offline=args.offline)
+    source = build_source(args.sport, args.source, client=client)
+    print(
+        f"fetching {args.sport.upper()} logs for {len(players)} player(s) "
+        f"from {source.name}, seasons {', '.join(str(s) for s in seasons)}\n"
+    )
+
+    failures = unreachable = 0
+    for name in dict.fromkeys(players):  # de-duplicate, keep order
+        try:
+            fetched = source.fetch(name, seasons, team=args.team)
+        except (UnknownPlayer, AmbiguousPlayer) as exc:
+            print(f"  !! {name}: {exc}")
+            failures += 1
+            continue
+        except FetchError as exc:
+            print(f"  !! {name}: {exc}")
+            failures += 1
+            unreachable += 1
+            continue
+        if not fetched.games:
+            print(f"  -- {name}: matched {fetched.ref.describe()} but no games in those seasons")
+            failures += 1
+            continue
+        path = write_logs(fetched, settings.data.gamelogs, merge=not args.replace)
+        print(
+            f"  ok {fetched.player:<24} {len(fetched.games):>3} games  "
+            f"{fetched.games[0]['date']} to {fetched.games[-1]['date']}  -> {path}"
+        )
+
+    print(f"\n{len(players) - failures} of {len(players)} player(s) written to {settings.data.gamelogs}/{args.sport}/")
+    if unreachable:
+        print(
+            f"{unreachable} failure(s) were network or policy errors, not bad names -- "
+            f"check that {source.name} is reachable from this machine"
+        )
+    elif failures:
+        print("re-run failures with --team to disambiguate, or check the spelling")
+    return 1 if failures and failures == len(players) else 0
+
+
+def cmd_sources(args: argparse.Namespace, settings: Settings) -> int:
+    from .ingest import DEFAULT_SOURCE, SOURCE_NOTES, SOURCES
+
+    for sport, available in SOURCES.items():
+        print(f"{sport.upper()}")
+        for name in available:
+            marker = "*" if DEFAULT_SOURCE[sport] == name else " "
+            print(f"  {marker} {name:<16} {SOURCE_NOTES.get(name, '')}")
+    print("\n* = default. Pick another with --source.")
+    return 0
+
+
 def cmd_config(args: argparse.Namespace, settings: Settings) -> int:
     if args.write:
         path = settings.save(args.write)
@@ -465,6 +554,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--config", help="path to a JSON config file")
     parser.add_argument("--db", help="override the journal database path")
+    parser.add_argument(
+        "--sample", action="store_true",
+        help="run against the synthetic slate in data/sample instead of fetched data",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     # -- scan
@@ -569,6 +662,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_snapshot)
 
+    # -- fetch
+    p = sub.add_parser("fetch", help="download real game logs for the models to read")
+    p.add_argument("--sport", required=True, choices=SPORTS)
+    p.add_argument("--player", action="append", help="player name (repeatable)")
+    p.add_argument("--from-props", action="store_true", help="every player on the current board")
+    p.add_argument("--seasons", help="comma-separated, e.g. 2024,2025")
+    p.add_argument("--season-count", type=int, default=2, help="how many recent seasons (default 2)")
+    p.add_argument("--source", help="override the default source for the sport")
+    p.add_argument("--team", help="disambiguate a shared name, e.g. --team BUF")
+    p.add_argument("--replace", action="store_true", help="overwrite instead of merging")
+    p.add_argument("--offline", action="store_true", help="use only what's already cached")
+    p.add_argument("--cache", help="cache directory (default .cache/ingest)")
+    p.set_defaults(func=cmd_fetch)
+
+    p = sub.add_parser("sources", help="list the game-log sources per sport")
+    p.set_defaults(func=cmd_sources)
+
     # -- config
     p = sub.add_parser("config", help="show or write the effective configuration")
     p.add_argument("--write", nargs="?", const="pmbot.config.json", help="write config to a file")
@@ -581,6 +691,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     settings = Settings.load(args.config)
+    if args.sample:
+        settings.data.use_sample()
     if args.db:
         settings.data.db = args.db
     try:

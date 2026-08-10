@@ -95,6 +95,18 @@ class DataSettings:
     db: str = "pmbot.sqlite3"
     cache: str = ".cache/odds"
 
+    def use_sample(self) -> "DataSettings":
+        """Point at the synthetic slate under ``data/sample``.
+
+        Fetched game logs and the shipped fixture deliberately live in
+        different directories. Mixing them is worse than useless: real logs
+        priced against synthetic lines produce enormous imaginary edges.
+        """
+        self.gamelogs = "data/sample/gamelogs"
+        self.props = "data/sample/props"
+        self.defense = "data/sample/defense.json"
+        return self
+
 
 @dataclass
 class ApiSettings:

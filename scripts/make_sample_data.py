@@ -23,6 +23,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "data" / "sample"   # the synthetic demo lives apart from fetched data
 SEED = 4242
 N_GAMES = 46
 BOOKS = ("pinnacle", "draftkings", "fanduel", "betmgm", "caesars")
@@ -115,7 +116,9 @@ def nfl_qb_game(p: dict) -> dict:
     return {
         "pass_attempts": att,
         "completions": comps,
-        "pass_yards": max(0, round(rng.gauss(p["ypa"] * att, 2.1 * math.sqrt(att)))),
+        # Real QB logs put the residual sd near 6 yards per sqrt(attempt);
+        # the first draft of this used 2.1 and produced absurdly tight props.
+        "pass_yards": max(0, round(rng.gauss(p["ypa"] * att, 6.1 * math.sqrt(att)))),
         "pass_tds": poisson(p["td_rate"] * att),
         "rush_attempts": max(0, round(clipped_normal(3.5, 2.0, 0, 12))),
         "rush_yards": max(-5, round(rng.gauss(14, 12))),
@@ -125,7 +128,7 @@ def nfl_qb_game(p: dict) -> dict:
 def nfl_receiver_game(p: dict) -> dict:
     targets = max(0, round(clipped_normal(p["targets"], p["targets_sd"], 0, 20)))
     recs = binomial(targets, p["catch_rate"])
-    yards = 0 if recs == 0 else max(0, round(rng.gauss(p["ypr"] * recs, 6.5 * math.sqrt(max(recs, 1)))))
+    yards = 0 if recs == 0 else max(0, round(rng.gauss(p["ypr"] * recs, 10.0 * math.sqrt(max(recs, 1)))))
     return {
         "targets": targets,
         "receptions": recs,
@@ -141,10 +144,10 @@ def nfl_rb_game(p: dict) -> dict:
     recs = binomial(targets, 0.76)
     return {
         "rush_attempts": carries,
-        "rush_yards": max(-5, round(rng.gauss(p["ypc"] * carries, 3.3 * math.sqrt(carries)))),
+        "rush_yards": max(-5, round(rng.gauss(p["ypc"] * carries, 7.0 * math.sqrt(carries)))),
         "targets": targets,
         "receptions": recs,
-        "receiving_yards": 0 if recs == 0 else max(0, round(rng.gauss(7.6 * recs, 6.0 * math.sqrt(recs)))),
+        "receiving_yards": 0 if recs == 0 else max(0, round(rng.gauss(7.6 * recs, 9.0 * math.sqrt(recs)))),
     }
 
 
@@ -217,12 +220,19 @@ def build_gamelogs() -> None:
                 }
             )
         games.sort(key=lambda g: g["date"])
-        folder = ROOT / "data" / "gamelogs" / player["sport"]
+        folder = OUT / "gamelogs" / player["sport"]
         folder.mkdir(parents=True, exist_ok=True)
         slug = player["name"].lower().replace(".", "").replace(" ", "-")
         (folder / f"{slug}.json").write_text(
             json.dumps(
-                {"player": player["name"], "team": player["team"], "sport": player["sport"], "games": games},
+                {
+                    "player": player["name"],
+                    "team": player["team"],
+                    "sport": player["sport"],
+                    # provenance, so a real fetch refuses to merge into this
+                    "source": "synthetic",
+                    "games": games,
+                },
                 indent=1,
             )
             + "\n"
@@ -277,7 +287,7 @@ MARKET_FIELDS: dict[str, tuple[str, ...]] = {
 def sample_values(player: dict, market: str) -> list[float]:
     """The stat, game by game, from the logs this player just got written."""
     slug = player["name"].lower().replace(".", "").replace(" ", "-")
-    path = ROOT / "data" / "gamelogs" / player["sport"] / f"{slug}.json"
+    path = OUT / "gamelogs" / player["sport"] / f"{slug}.json"
     games = json.loads(path.read_text())["games"]
     return [sum(g[f] for f in MARKET_FIELDS[market]) for g in games]
 
@@ -440,7 +450,7 @@ def build_props() -> None:
             }
         )
 
-    folder = ROOT / "data" / "props"
+    folder = OUT / "props"
     folder.mkdir(parents=True, exist_ok=True)
     for sport, payload in per_sport.items():
         payload["events"] = list(payload["events"].values())
@@ -448,11 +458,11 @@ def build_props() -> None:
 
 
 def build_defense() -> None:
-    (ROOT / "data" / "defense.json").write_text(json.dumps(DEFENSE, indent=1) + "\n")
+    (OUT / "defense.json").write_text(json.dumps(DEFENSE, indent=1) + "\n")
 
 
 if __name__ == "__main__":
     build_gamelogs()
     build_props()
     build_defense()
-    print(f"wrote sample data for {len(PLAYERS)} players and {len(PROPS)} props under {ROOT / 'data'}")
+    print(f"wrote sample data for {len(PLAYERS)} players and {len(PROPS)} props under {OUT}")

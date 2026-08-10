@@ -2,6 +2,7 @@
  "player": "Tarik Skubal",
  "team": "DET",
  "sport": "mlb",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",

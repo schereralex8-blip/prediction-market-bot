@@ -2,6 +2,7 @@
  "player": "Anthony Edwards",
  "team": "MIN",
  "sport": "nba",
+ "source": "synthetic",
  "games": [
   {
    "date": "2026-03-28",

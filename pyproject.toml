@@ -18,7 +18,7 @@ dev = ["pytest>=7"]
 pmbot = "pmbot.cli:main"
 
 [tool.setuptools]
-packages = ["pmbot", "pmbot.models", "pmbot.providers", "pmbot.journal"]
+packages = ["pmbot", "pmbot.models", "pmbot.providers", "pmbot.journal", "pmbot.ingest"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

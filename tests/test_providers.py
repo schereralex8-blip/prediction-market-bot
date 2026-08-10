@@ -34,24 +34,24 @@ class TestSlugify:
 
 class TestLocalProviders:
     def test_props_load_from_the_fixture_slate(self):
-        props = LocalOddsProvider("data/props").player_props("nba", ["player_points"])
+        props = LocalOddsProvider("data/sample/props").player_props("nba", ["player_points"])
         assert props
         assert all(p.market == "player_points" for p in props)
         assert all(p.two_way_books for p in props)
 
     def test_markets_are_filtered(self):
-        props = LocalOddsProvider("data/props").player_props("nba", ["player_rebounds"])
+        props = LocalOddsProvider("data/sample/props").player_props("nba", ["player_rebounds"])
         assert {p.market for p in props} == {"player_rebounds"}
 
     def test_events_can_be_filtered(self):
-        provider = LocalOddsProvider("data/props")
+        provider = LocalOddsProvider("data/sample/props")
         everything = provider.player_props("nba", ["player_points"])
         one = everything[0].event_id
         assert {p.event_id for p in provider.player_props("nba", ["player_points"], [one])} == {one}
 
     def test_a_stored_slate_is_replayed_as_tonight(self):
         """A fixture checked in months ago must still scan."""
-        props = LocalOddsProvider("data/props").player_props("nba", ["player_points"])
+        props = LocalOddsProvider("data/sample/props").player_props("nba", ["player_points"])
         assert all(p.commence_time > datetime.now(timezone.utc) for p in props)
 
     def test_replay_can_be_turned_off(self, tmp_path):
@@ -71,33 +71,33 @@ class TestLocalProviders:
         assert LocalOddsProvider(tmp_path / "nope").player_props("nba", ["player_points"]) == []
 
     def test_game_logs_load_and_cache(self):
-        provider = LocalGameLogProvider("data/gamelogs")
+        provider = LocalGameLogProvider("data/sample/gamelogs")
         logs = provider.logs_for("Anthony Edwards", "nba")
         assert len(logs) > 20
         assert logs is provider.logs_for("Anthony Edwards", "nba")  # cached
         assert all("minutes" in g.stats for g in logs)
 
     def test_an_unknown_player_has_no_logs(self):
-        assert LocalGameLogProvider("data/gamelogs").logs_for("Nobody", "nba") == []
+        assert LocalGameLogProvider("data/sample/gamelogs").logs_for("Nobody", "nba") == []
 
     def test_known_players_are_listable(self):
-        assert "Anthony Edwards" in LocalGameLogProvider("data/gamelogs").known_players("nba")
+        assert "Anthony Edwards" in LocalGameLogProvider("data/sample/gamelogs").known_players("nba")
 
 
 class TestMatchupBook:
     def test_factors_are_applied_and_explained(self):
-        book = MatchupBook("data/defense.json")
+        book = MatchupBook("data/sample/defense.json")
         context = book.context_for(sport="nba", market="player_points", opponent="MIN", is_home=False)
         assert context.opponent_factor < 1.0  # MIN is a tough defence in the fixture
         assert context.notes
 
     def test_unknown_teams_get_no_adjustment(self):
-        book = MatchupBook("data/defense.json")
+        book = MatchupBook("data/sample/defense.json")
         context = book.context_for(sport="nba", market="player_points", opponent="ZZZ", is_home=None)
         assert context.combined == pytest.approx(1.0)
 
     def test_home_and_away_are_mirror_images(self):
-        book = MatchupBook("data/defense.json")
+        book = MatchupBook("data/sample/defense.json")
         home = book.context_for(sport="nba", market="player_points", opponent="ZZZ", is_home=True)
         away = book.context_for(sport="nba", market="player_points", opponent="ZZZ", is_home=False)
         assert home.home_factor * away.home_factor == pytest.approx(1.0)
