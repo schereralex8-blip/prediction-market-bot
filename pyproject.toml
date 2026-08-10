@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pmbot"
+version = "1.0.0"
+description = "Two-model, de-vigged, Kelly-sized player prop bot with a betting journal"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []  # standard library only, on purpose
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+pmbot = "pmbot.cli:main"
+
+[tool.setuptools]
+packages = ["pmbot", "pmbot.models", "pmbot.providers", "pmbot.journal"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]

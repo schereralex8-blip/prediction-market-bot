@@ -1,0 +1,467 @@
+{
+ "player": "Tarik Skubal",
+ "team": "DET",
+ "sport": "mlb",
+ "games": [
+  {
+   "date": "2026-03-28",
+   "opponent": "GSW",
+   "home": false,
+   "batters_faced": 29,
+   "strikeouts": 14,
+   "hits_allowed": 5,
+   "outs": 25,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-03-31",
+   "opponent": "MIA",
+   "home": true,
+   "batters_faced": 27,
+   "strikeouts": 9,
+   "hits_allowed": 4,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-04-03",
+   "opponent": "PHX",
+   "home": false,
+   "batters_faced": 24,
+   "strikeouts": 6,
+   "hits_allowed": 3,
+   "outs": 18,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-06",
+   "opponent": "LAL",
+   "home": true,
+   "batters_faced": 25,
+   "strikeouts": 10,
+   "hits_allowed": 6,
+   "outs": 20,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-09",
+   "opponent": "DEN",
+   "home": false,
+   "batters_faced": 27,
+   "strikeouts": 11,
+   "hits_allowed": 7,
+   "outs": 19,
+   "earned_runs": 0
+  },
+  {
+   "date": "2026-04-12",
+   "opponent": "BOS",
+   "home": true,
+   "batters_faced": 27,
+   "strikeouts": 9,
+   "hits_allowed": 6,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-04-15",
+   "opponent": "CLE",
+   "home": false,
+   "batters_faced": 32,
+   "strikeouts": 12,
+   "hits_allowed": 5,
+   "outs": 23,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-18",
+   "opponent": "NYK",
+   "home": true,
+   "batters_faced": 22,
+   "strikeouts": 7,
+   "hits_allowed": 2,
+   "outs": 13,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-21",
+   "opponent": "DAL",
+   "home": false,
+   "batters_faced": 24,
+   "strikeouts": 8,
+   "hits_allowed": 4,
+   "outs": 15,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-04-24",
+   "opponent": "OKC",
+   "home": true,
+   "batters_faced": 23,
+   "strikeouts": 10,
+   "hits_allowed": 3,
+   "outs": 19,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-27",
+   "opponent": "GSW",
+   "home": false,
+   "batters_faced": 30,
+   "strikeouts": 9,
+   "hits_allowed": 7,
+   "outs": 22,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-04-30",
+   "opponent": "MIA",
+   "home": true,
+   "batters_faced": 27,
+   "strikeouts": 10,
+   "hits_allowed": 3,
+   "outs": 17,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-05-03",
+   "opponent": "PHX",
+   "home": false,
+   "batters_faced": 29,
+   "strikeouts": 9,
+   "hits_allowed": 3,
+   "outs": 20,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-05-06",
+   "opponent": "LAL",
+   "home": true,
+   "batters_faced": 27,
+   "strikeouts": 9,
+   "hits_allowed": 5,
+   "outs": 21,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-05-09",
+   "opponent": "DEN",
+   "home": false,
+   "batters_faced": 20,
+   "strikeouts": 9,
+   "hits_allowed": 6,
+   "outs": 12,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-05-12",
+   "opponent": "BOS",
+   "home": true,
+   "batters_faced": 25,
+   "strikeouts": 10,
+   "hits_allowed": 5,
+   "outs": 20,
+   "earned_runs": 0
+  },
+  {
+   "date": "2026-05-15",
+   "opponent": "CLE",
+   "home": false,
+   "batters_faced": 25,
+   "strikeouts": 8,
+   "hits_allowed": 4,
+   "outs": 16,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-05-18",
+   "opponent": "NYK",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 4,
+   "hits_allowed": 5,
+   "outs": 18,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-05-21",
+   "opponent": "DAL",
+   "home": false,
+   "batters_faced": 23,
+   "strikeouts": 2,
+   "hits_allowed": 10,
+   "outs": 16,
+   "earned_runs": 5
+  },
+  {
+   "date": "2026-05-24",
+   "opponent": "OKC",
+   "home": true,
+   "batters_faced": 25,
+   "strikeouts": 6,
+   "hits_allowed": 6,
+   "outs": 15,
+   "earned_runs": 3
+  },
+  {
+   "date": "2026-05-27",
+   "opponent": "GSW",
+   "home": false,
+   "batters_faced": 26,
+   "strikeouts": 6,
+   "hits_allowed": 6,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-05-30",
+   "opponent": "MIA",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 7,
+   "hits_allowed": 4,
+   "outs": 19,
+   "earned_runs": 0
+  },
+  {
+   "date": "2026-06-02",
+   "opponent": "PHX",
+   "home": false,
+   "batters_faced": 26,
+   "strikeouts": 7,
+   "hits_allowed": 4,
+   "outs": 18,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-06-05",
+   "opponent": "LAL",
+   "home": true,
+   "batters_faced": 29,
+   "strikeouts": 10,
+   "hits_allowed": 11,
+   "outs": 18,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-06-08",
+   "opponent": "DEN",
+   "home": false,
+   "batters_faced": 25,
+   "strikeouts": 10,
+   "hits_allowed": 5,
+   "outs": 17,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-06-11",
+   "opponent": "BOS",
+   "home": true,
+   "batters_faced": 25,
+   "strikeouts": 13,
+   "hits_allowed": 5,
+   "outs": 18,
+   "earned_runs": 3
+  },
+  {
+   "date": "2026-06-14",
+   "opponent": "CLE",
+   "home": false,
+   "batters_faced": 22,
+   "strikeouts": 7,
+   "hits_allowed": 6,
+   "outs": 16,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-06-17",
+   "opponent": "NYK",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 7,
+   "hits_allowed": 4,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-06-20",
+   "opponent": "DAL",
+   "home": false,
+   "batters_faced": 27,
+   "strikeouts": 9,
+   "hits_allowed": 5,
+   "outs": 17,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-06-23",
+   "opponent": "OKC",
+   "home": true,
+   "batters_faced": 22,
+   "strikeouts": 4,
+   "hits_allowed": 4,
+   "outs": 12,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-06-26",
+   "opponent": "GSW",
+   "home": false,
+   "batters_faced": 28,
+   "strikeouts": 7,
+   "hits_allowed": 7,
+   "outs": 21,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-06-29",
+   "opponent": "MIA",
+   "home": true,
+   "batters_faced": 28,
+   "strikeouts": 8,
+   "hits_allowed": 5,
+   "outs": 20,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-07-02",
+   "opponent": "PHX",
+   "home": false,
+   "batters_faced": 23,
+   "strikeouts": 7,
+   "hits_allowed": 4,
+   "outs": 16,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-07-05",
+   "opponent": "LAL",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 7,
+   "hits_allowed": 8,
+   "outs": 15,
+   "earned_runs": 2
+  },
+  {
+   "date": "2026-07-08",
+   "opponent": "DEN",
+   "home": false,
+   "batters_faced": 25,
+   "strikeouts": 11,
+   "hits_allowed": 6,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-07-11",
+   "opponent": "BOS",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 8,
+   "hits_allowed": 4,
+   "outs": 21,
+   "earned_runs": 3
+  },
+  {
+   "date": "2026-07-14",
+   "opponent": "CLE",
+   "home": false,
+   "batters_faced": 23,
+   "strikeouts": 5,
+   "hits_allowed": 5,
+   "outs": 15,
+   "earned_runs": 3
+  },
+  {
+   "date": "2026-07-17",
+   "opponent": "NYK",
+   "home": true,
+   "batters_faced": 23,
+   "strikeouts": 6,
+   "hits_allowed": 4,
+   "outs": 16,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-07-20",
+   "opponent": "DAL",
+   "home": false,
+   "batters_faced": 25,
+   "strikeouts": 8,
+   "hits_allowed": 4,
+   "outs": 18,
+   "earned_runs": 3
+  },
+  {
+   "date": "2026-07-23",
+   "opponent": "OKC",
+   "home": true,
+   "batters_faced": 26,
+   "strikeouts": 6,
+   "hits_allowed": 6,
+   "outs": 21,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-07-26",
+   "opponent": "GSW",
+   "home": false,
+   "batters_faced": 22,
+   "strikeouts": 9,
+   "hits_allowed": 6,
+   "outs": 10,
+   "earned_runs": 5
+  },
+  {
+   "date": "2026-07-29",
+   "opponent": "MIA",
+   "home": true,
+   "batters_faced": 32,
+   "strikeouts": 8,
+   "hits_allowed": 7,
+   "outs": 22,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-08-01",
+   "opponent": "PHX",
+   "home": false,
+   "batters_faced": 25,
+   "strikeouts": 8,
+   "hits_allowed": 4,
+   "outs": 19,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-08-04",
+   "opponent": "LAL",
+   "home": true,
+   "batters_faced": 28,
+   "strikeouts": 8,
+   "hits_allowed": 5,
+   "outs": 20,
+   "earned_runs": 4
+  },
+  {
+   "date": "2026-08-07",
+   "opponent": "DEN",
+   "home": false,
+   "batters_faced": 26,
+   "strikeouts": 9,
+   "hits_allowed": 6,
+   "outs": 15,
+   "earned_runs": 1
+  },
+  {
+   "date": "2026-08-10",
+   "opponent": "BOS",
+   "home": true,
+   "batters_faced": 20,
+   "strikeouts": 6,
+   "hits_allowed": 4,
+   "outs": 15,
+   "earned_runs": 1
+  }
+ ]
+}

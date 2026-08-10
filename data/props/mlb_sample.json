@@ -1,0 +1,189 @@
+{
+ "sport": "mlb",
+ "events": [
+  {
+   "id": "mlb-cle-det",
+   "commence_time": "2026-08-11T04:00:19Z",
+   "home_team": "DET",
+   "away_team": "CLE",
+   "props": [
+    {
+     "player": "Tarik Skubal",
+     "team": "DET",
+     "opponent": "CLE",
+     "market": "pitcher_strikeouts",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 8.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "draftkings",
+       "line": 8.5,
+       "over": 140,
+       "under": -165
+      },
+      {
+       "book": "fanduel",
+       "line": 8.5,
+       "over": 185,
+       "under": -225
+      },
+      {
+       "book": "betmgm",
+       "line": 8.5,
+       "over": 130,
+       "under": -155
+      },
+      {
+       "book": "caesars",
+       "line": 8.5,
+       "over": 140,
+       "under": -165
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mlb-atl-phi",
+   "commence_time": "2026-08-11T06:00:19Z",
+   "home_team": "PHI",
+   "away_team": "ATL",
+   "props": [
+    {
+     "player": "Zack Wheeler",
+     "team": "PHI",
+     "opponent": "ATL",
+     "market": "pitcher_strikeouts",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 6.5,
+       "over": 130,
+       "under": -155
+      },
+      {
+       "book": "draftkings",
+       "line": 6.5,
+       "over": 140,
+       "under": -170
+      },
+      {
+       "book": "fanduel",
+       "line": 6.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "betmgm",
+       "line": 6.5,
+       "over": 125,
+       "under": -145
+      },
+      {
+       "book": "caesars",
+       "line": 6.5,
+       "over": 145,
+       "under": -170
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mlb-bos-nyy",
+   "commence_time": "2026-08-11T08:00:19Z",
+   "home_team": "NYY",
+   "away_team": "BOS",
+   "props": [
+    {
+     "player": "Aaron Judge",
+     "team": "NYY",
+     "opponent": "BOS",
+     "market": "batter_total_bases",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 2.5,
+       "over": 205,
+       "under": -250
+      },
+      {
+       "book": "draftkings",
+       "line": 2.5,
+       "over": 200,
+       "under": -245
+      },
+      {
+       "book": "fanduel",
+       "line": 2.5,
+       "over": 195,
+       "under": -235
+      },
+      {
+       "book": "betmgm",
+       "line": 2.5,
+       "over": 205,
+       "under": -250
+      },
+      {
+       "book": "caesars",
+       "line": 2.5,
+       "over": 210,
+       "under": -260
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mlb-kc-min",
+   "commence_time": "2026-08-11T10:00:19Z",
+   "home_team": "MIN",
+   "away_team": "KC",
+   "props": [
+    {
+     "player": "Bobby Witt Jr.",
+     "team": "KC",
+     "opponent": "MIN",
+     "market": "batter_hits",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 1.0,
+       "over": -230,
+       "under": 190
+      },
+      {
+       "book": "draftkings",
+       "line": 1.0,
+       "over": -220,
+       "under": 180
+      },
+      {
+       "book": "fanduel",
+       "line": 1.0,
+       "over": -230,
+       "under": 190
+      },
+      {
+       "book": "betmgm",
+       "line": 1.0,
+       "over": -235,
+       "under": 195
+      },
+      {
+       "book": "caesars",
+       "line": 1.0,
+       "over": -240,
+       "under": 195
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

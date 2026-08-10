@@ -1,0 +1,333 @@
+{
+ "sport": "nba",
+ "events": [
+  {
+   "id": "nba-min-sac",
+   "commence_time": "2026-08-11T04:00:19Z",
+   "home_team": "SAC",
+   "away_team": "MIN",
+   "props": [
+    {
+     "player": "Anthony Edwards",
+     "team": "MIN",
+     "opponent": "SAC",
+     "market": "player_points",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 27.5,
+       "over": 130,
+       "under": -155
+      },
+      {
+       "book": "draftkings",
+       "line": 27.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "fanduel",
+       "line": 27.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "betmgm",
+       "line": 27.5,
+       "over": 115,
+       "under": -140
+      },
+      {
+       "book": "caesars",
+       "line": 27.5,
+       "over": 165,
+       "under": -200
+      }
+     ]
+    },
+    {
+     "player": "Anthony Edwards",
+     "team": "MIN",
+     "opponent": "SAC",
+     "market": "player_rebounds",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 6.5,
+       "over": 180,
+       "under": -220
+      },
+      {
+       "book": "draftkings",
+       "line": 6.5,
+       "over": 155,
+       "under": -190
+      },
+      {
+       "book": "fanduel",
+       "line": 6.5,
+       "over": 185,
+       "under": -225
+      },
+      {
+       "book": "betmgm",
+       "line": 6.5,
+       "over": 180,
+       "under": -220
+      },
+      {
+       "book": "caesars",
+       "line": 6.5,
+       "over": 170,
+       "under": -210
+      }
+     ]
+    },
+    {
+     "player": "Rudy Gobert",
+     "team": "MIN",
+     "opponent": "SAC",
+     "market": "player_rebounds",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 14.0,
+       "over": 130,
+       "under": -155
+      },
+      {
+       "book": "draftkings",
+       "line": 14.0,
+       "over": 135,
+       "under": -160
+      },
+      {
+       "book": "fanduel",
+       "line": 14.0,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "betmgm",
+       "line": 14.0,
+       "over": 115,
+       "under": -140
+      },
+      {
+       "book": "caesars",
+       "line": 14.0,
+       "over": 130,
+       "under": -160
+      }
+     ]
+    },
+    {
+     "player": "Domantas Sabonis",
+     "team": "SAC",
+     "opponent": "MIN",
+     "market": "player_points_rebounds_assists",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 38.5,
+       "over": 115,
+       "under": -135
+      },
+      {
+       "book": "draftkings",
+       "line": 38.5,
+       "over": 110,
+       "under": -130
+      },
+      {
+       "book": "fanduel",
+       "line": 38.5,
+       "over": 100,
+       "under": -120
+      },
+      {
+       "book": "betmgm",
+       "line": 38.5,
+       "over": -100,
+       "under": -115
+      },
+      {
+       "book": "caesars",
+       "line": 38.5,
+       "over": 105,
+       "under": -125
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nba-nyk-orl",
+   "commence_time": "2026-08-11T06:00:19Z",
+   "home_team": "ORL",
+   "away_team": "NYK",
+   "props": [
+    {
+     "player": "Jalen Brunson",
+     "team": "NYK",
+     "opponent": "ORL",
+     "market": "player_points",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 28.0,
+       "over": 140,
+       "under": -170
+      },
+      {
+       "book": "draftkings",
+       "line": 28.0,
+       "over": 150,
+       "under": -180
+      },
+      {
+       "book": "fanduel",
+       "line": 28.0,
+       "over": 140,
+       "under": -165
+      },
+      {
+       "book": "betmgm",
+       "line": 28.0,
+       "over": 135,
+       "under": -165
+      },
+      {
+       "book": "caesars",
+       "line": 28.0,
+       "over": 125,
+       "under": -150
+      }
+     ]
+    },
+    {
+     "player": "Jalen Brunson",
+     "team": "NYK",
+     "opponent": "ORL",
+     "market": "player_assists",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 6.5,
+       "over": 105,
+       "under": -130
+      },
+      {
+       "book": "draftkings",
+       "line": 6.5,
+       "over": 105,
+       "under": -125
+      },
+      {
+       "book": "fanduel",
+       "line": 6.5,
+       "over": 105,
+       "under": -125
+      },
+      {
+       "book": "betmgm",
+       "line": 6.5,
+       "over": 110,
+       "under": -130
+      },
+      {
+       "book": "caesars",
+       "line": 6.5,
+       "over": 100,
+       "under": -120
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nba-chi-ind",
+   "commence_time": "2026-08-11T08:00:19Z",
+   "home_team": "IND",
+   "away_team": "CHI",
+   "props": [
+    {
+     "player": "Tyrese Haliburton",
+     "team": "IND",
+     "opponent": "CHI",
+     "market": "player_assists",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 9.5,
+       "over": 100,
+       "under": -120
+      },
+      {
+       "book": "draftkings",
+       "line": 9.5,
+       "over": 105,
+       "under": -125
+      },
+      {
+       "book": "fanduel",
+       "line": 9.5,
+       "over": 100,
+       "under": -120
+      },
+      {
+       "book": "betmgm",
+       "line": 9.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "caesars",
+       "line": 9.5,
+       "over": -105,
+       "under": -115
+      }
+     ]
+    },
+    {
+     "player": "Tyrese Haliburton",
+     "team": "IND",
+     "opponent": "CHI",
+     "market": "player_points",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 19.0,
+       "over": -110,
+       "under": -105
+      },
+      {
+       "book": "draftkings",
+       "line": 19.0,
+       "over": -120,
+       "under": 100
+      },
+      {
+       "book": "fanduel",
+       "line": 19.0,
+       "over": -105,
+       "under": -110
+      },
+      {
+       "book": "betmgm",
+       "line": 19.0,
+       "over": -110,
+       "under": -110
+      },
+      {
+       "book": "caesars",
+       "line": 19.0,
+       "over": -110,
+       "under": -110
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

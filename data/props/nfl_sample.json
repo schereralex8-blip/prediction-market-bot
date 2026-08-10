@@ -1,0 +1,189 @@
+{
+ "sport": "nfl",
+ "events": [
+  {
+   "id": "nfl-kc-lv",
+   "commence_time": "2026-08-11T04:00:19Z",
+   "home_team": "LV",
+   "away_team": "KC",
+   "props": [
+    {
+     "player": "Patrick Mahomes",
+     "team": "KC",
+     "opponent": "LV",
+     "market": "player_pass_yds",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 253.5,
+       "over": -115,
+       "under": -105
+      },
+      {
+       "book": "draftkings",
+       "line": 253.5,
+       "over": -110,
+       "under": -110
+      },
+      {
+       "book": "fanduel",
+       "line": 253.5,
+       "over": -115,
+       "under": -105
+      },
+      {
+       "book": "betmgm",
+       "line": 253.5,
+       "over": -105,
+       "under": -110
+      },
+      {
+       "book": "caesars",
+       "line": 253.5,
+       "over": -105,
+       "under": -115
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nfl-buf-mia",
+   "commence_time": "2026-08-11T06:00:19Z",
+   "home_team": "MIA",
+   "away_team": "BUF",
+   "props": [
+    {
+     "player": "Josh Allen",
+     "team": "BUF",
+     "opponent": "MIA",
+     "market": "player_pass_yds",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 236.5,
+       "over": 110,
+       "under": -135
+      },
+      {
+       "book": "draftkings",
+       "line": 236.5,
+       "over": 150,
+       "under": -185
+      },
+      {
+       "book": "fanduel",
+       "line": 236.5,
+       "over": 125,
+       "under": -150
+      },
+      {
+       "book": "betmgm",
+       "line": 236.5,
+       "over": 120,
+       "under": -145
+      },
+      {
+       "book": "caesars",
+       "line": 236.5,
+       "over": 115,
+       "under": -135
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nfl-dal-phi",
+   "commence_time": "2026-08-11T08:00:19Z",
+   "home_team": "PHI",
+   "away_team": "DAL",
+   "props": [
+    {
+     "player": "CeeDee Lamb",
+     "team": "DAL",
+     "opponent": "PHI",
+     "market": "player_receptions",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 6.5,
+       "over": 130,
+       "under": -160
+      },
+      {
+       "book": "draftkings",
+       "line": 6.5,
+       "over": 135,
+       "under": -165
+      },
+      {
+       "book": "fanduel",
+       "line": 6.5,
+       "over": 140,
+       "under": -170
+      },
+      {
+       "book": "betmgm",
+       "line": 6.5,
+       "over": 155,
+       "under": -185
+      },
+      {
+       "book": "caesars",
+       "line": 6.5,
+       "over": 135,
+       "under": -165
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nfl-atl-tb",
+   "commence_time": "2026-08-11T10:00:19Z",
+   "home_team": "TB",
+   "away_team": "ATL",
+   "props": [
+    {
+     "player": "Bijan Robinson",
+     "team": "ATL",
+     "opponent": "TB",
+     "market": "player_rush_yds",
+     "books": [
+      {
+       "book": "pinnacle",
+       "line": 75.5,
+       "over": -105,
+       "under": -115
+      },
+      {
+       "book": "draftkings",
+       "line": 75.5,
+       "over": -105,
+       "under": -115
+      },
+      {
+       "book": "fanduel",
+       "line": 75.5,
+       "over": -115,
+       "under": -100
+      },
+      {
+       "book": "betmgm",
+       "line": 75.5,
+       "over": -120,
+       "under": 100
+      },
+      {
+       "book": "caesars",
+       "line": 75.5,
+       "over": -115,
+       "under": -105
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

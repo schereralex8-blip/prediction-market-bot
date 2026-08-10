@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# your journal and your bankroll are yours
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+pmbot.config.json
+
+# cached API responses
+.cache/
