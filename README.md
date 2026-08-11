@@ -291,14 +291,19 @@ committed. **One service** serves the dashboard and runs the daily refresh on
 an internal timer:
 
 ```bash
-PMBOT_DAILY_AT=16:00 PMBOT_DAILY_SPORTS=nba,nfl   # arms the daily pass
+PMBOT_DAILY_AT="16:00, 23:00=close" PMBOT_DAILY_SPORTS=nba,nfl
 ```
 
-Each pass refreshes game logs for everyone on the board, stamps closing lines
-on bets still missing them, and prices the slate. It's one service rather than
-two because a hosted volume attaches to exactly one — a separate cron service
-would get its own empty journal and its work would vanish silently. Progress is
-visible at `/api/schedule` and in the dashboard footer.
+The schedule is a list. A bare time runs every step — refresh game logs for
+everyone on the board, stamp closing lines, price the slate — and `TIME=steps`
+narrows it, so the second entry above only captures closing lines near lock,
+which is what makes CLV meaningful. Entries are tracked separately: each fires
+at its own time and one failing doesn't affect the other.
+
+It's one service rather than two because a hosted volume attaches to exactly
+one — a separate cron service would get its own empty journal and its work
+would vanish silently. Progress is visible at `/api/schedule` and in the
+dashboard footer.
 
 ```bash
 docker build -t pmbot .
@@ -370,11 +375,11 @@ pmbot/
   providers/      The Odds API client, file-backed providers
   ingest/         real game logs: nflverse, hoopR, MLB Stats API, stats.nba.com
   server.py       read-only dashboard + JSON API (stdlib http.server)
-  scheduler.py    the daily pass, run in-process so it shares the volume
+  scheduler.py    scheduled passes, run in-process so they share the volume
   cli.py          the command line
 ```
 
-Run the tests with `pytest` (410 of them, no network, ~17s). Two opt-in live
+Run the tests with `pytest` (443 of them, no network, ~17s). Two opt-in live
 checks hit the real nflverse and hoopR feeds: `PMBOT_LIVE_TESTS=1 pytest -k live`.
 
 ---

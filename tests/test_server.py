@@ -137,13 +137,12 @@ class TestScheduleRoute:
 
     def test_an_armed_job_is_visible(self, settings):
         """A scheduler you cannot observe is one you cannot trust."""
-        from datetime import time as dtime
-
-        from pmbot.scheduler import DailyScheduler
+        from pmbot.scheduler import DailySchedule, parse_schedule
 
         srv = make_server(settings, host="127.0.0.1", port=0, token=TOKEN)
-        srv.service.scheduler = DailyScheduler(
-            job=lambda: "nba: 2 bet(s)", at=dtime(16, 0),
+        srv.service.scheduler = DailySchedule(
+            runs=parse_schedule("16:00, 23:00=close"),
+            job=lambda run: "nba: 2 bet(s)",
             state_path=settings.data.db + ".sched.json",
         )
         thread = threading.Thread(target=srv.serve_forever, daemon=True)
@@ -152,8 +151,9 @@ class TestScheduleRoute:
             base = f"http://127.0.0.1:{srv.server_address[1]}"
             payload = json.loads(get(f"{base}/api/schedule", TOKEN)[1])
             assert payload["enabled"] is True
-            assert payload["schedule_utc"] == "16:00"
-            assert json.loads(get(f"{base}/healthz")[1])["daily_job"]["schedule_utc"] == "16:00"
+            assert [e["label"] for e in payload["runs"]] == ["16:00 full", "23:00 close"]
+            health = json.loads(get(f"{base}/healthz")[1])
+            assert health["daily_job"]["schedule"] == "16:00 full, 23:00 close"
         finally:
             srv.shutdown()
             srv.server_close()
@@ -227,19 +227,32 @@ class TestDashboardRendering:
         html = render_dashboard(sport="nba", signals=[signal], age=0.0, overview=self.overview())
         assert "<img src=x" not in html
 
-    def test_the_daily_job_is_shown_in_the_footer(self):
+    def test_every_scheduled_entry_is_shown_in_the_footer(self):
         html = render_dashboard(
             sport="nba", signals=[], age=0.0, overview=self.overview(),
-            schedule={"schedule_utc": "16:00", "last_status": "ok",
-                      "last_finished_at": "2026-08-11T16:00:09+00:00",
-                      "next_run": "2026-08-12T16:00:00+00:00",
-                      "last_summary": "nba: 2 bet(s)"},
+            schedule={
+                "next_run": "2026-08-12T16:00:00+00:00",
+                "last_summary": "nba: 2 bet(s)",
+                "runs": [
+                    {"label": "16:00 full", "last_status": "ok"},
+                    {"label": "23:00 close", "last_status": None},
+                ],
+            },
         )
-        assert "Daily pass 16:00 UTC" in html and "nba: 2 bet(s)" in html
+        assert "16:00 full" in html and "23:00 close" in html
+        assert "not yet run" in html  # the close pass hasn't fired today
+        assert "nba: 2 bet(s)" in html
 
-    def test_a_missing_daily_job_is_called_out(self):
+    def test_a_failed_entry_is_not_hidden(self):
+        html = render_dashboard(
+            sport="nba", signals=[], age=0.0, overview=self.overview(),
+            schedule={"next_run": "x", "runs": [{"label": "16:00 full", "last_status": "failed"}]},
+        )
+        assert "FAILED" in html
+
+    def test_a_missing_schedule_is_called_out(self):
         html = render_dashboard(sport="nba", signals=[], age=0.0, overview=self.overview())
-        assert "No daily pass armed" in html
+        assert "No scheduled passes armed" in html
 
     def test_an_empty_board_says_so(self):
         html = render_dashboard(sport="nba", signals=[], age=0.0, overview=self.overview())

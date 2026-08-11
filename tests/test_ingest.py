@@ -316,6 +316,39 @@ class TestNflverse:
         with pytest.raises(UnknownPlayer):
             nfl_source.fetch("Nobody Here", [2024])
 
+    def test_an_unpublished_season_does_not_sink_the_published_one(self):
+        """Before week 1 the new season file 404s. That must not skip everyone."""
+        class Missing(FakeClient):
+            def get_csv(self, url, headers=None, ttl=None):
+                if "stats_player_week_2025" in url:
+                    raise FetchError("HTTP 404 for stats_player_week_2025.csv: Not Found")
+                return super().get_csv(url, headers, ttl)
+
+        source = NflverseSource(client=Missing(csv_payloads={
+            "stats_player_week_2024": NFL_WEEKLY, "schedules/games.csv": NFL_SCHEDULE,
+        }))
+        logs = source.fetch("Josh Allen", [2024, 2025])
+        assert len(logs.games) == 2  # the 2024 season still came through
+
+    def test_no_data_at_all_says_so_rather_than_blaming_the_name(self):
+        class AllMissing(FakeClient):
+            def get_csv(self, url, headers=None, ttl=None):
+                if "stats_player_week" in url:
+                    raise FetchError("HTTP 404: Not Found")
+                return super().get_csv(url, headers, ttl)
+
+        source = NflverseSource(client=AllMissing(csv_payloads={"schedules/games.csv": NFL_SCHEDULE}))
+        with pytest.raises(FetchError, match="not published yet"):
+            source.fetch("Josh Allen", [2025, 2026])
+
+    def test_a_non_404_error_still_propagates(self):
+        class Broken(FakeClient):
+            def get_csv(self, url, headers=None, ttl=None):
+                raise FetchError("HTTP 500 for stats_player_week_2024.csv")
+
+        with pytest.raises(FetchError, match="500"):
+            NflverseSource(client=Broken()).fetch("Josh Allen", [2024])
+
     def test_week_dates_preserve_ordering_without_a_schedule(self):
         assert week_to_date(2024, 1) < week_to_date(2024, 2) < week_to_date(2024, 18)
 
@@ -575,6 +608,25 @@ class TestHoopR:
     def test_games_come_back_oldest_first(self):
         games = hoopr_source().fetch("Anthony Edwards", [2024]).games
         assert games == sorted(games, key=lambda g: g["date"])
+
+    def test_a_season_that_has_not_tipped_off_is_skipped(self):
+        """Searching only the newest season would report everyone as unknown."""
+        class Missing(FakeClient):
+            def get_csv(self, url, headers=None, ttl=None):
+                if "player_box_2026" in url:
+                    raise FetchError("HTTP 404 for player_box_2026.csv: Not Found")
+                return super().get_csv(url, headers, ttl)
+
+        source = HoopRSource(client=Missing(csv_payloads={"player_box_2025.csv": HOOPR_ROWS}))
+        assert source.fetch("Anthony Edwards", [2024, 2025]).games
+
+    def test_no_data_at_all_says_so(self):
+        class AllMissing(FakeClient):
+            def get_csv(self, url, headers=None, ttl=None):
+                raise FetchError("HTTP 404: Not Found")
+
+        with pytest.raises(FetchError, match="not published yet"):
+            HoopRSource(client=AllMissing()).fetch("Anthony Edwards", [2025])
 
 
 # ==========================================================================

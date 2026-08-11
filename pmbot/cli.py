@@ -561,7 +561,7 @@ def cmd_serve(args: argparse.Namespace, settings: Settings) -> int:
 
     server = make_server(settings, host=args.host, port=port, token=token or None, scan_ttl=args.scan_ttl)
 
-    scheduler = build_daily_scheduler(args, settings, on_finish=server.service.cache.clear)
+    scheduler = build_schedule(args, settings, on_finish=server.service.cache.clear)
     if scheduler:
         server.service.scheduler = scheduler
         scheduler.start()
@@ -577,20 +577,20 @@ def cmd_serve(args: argparse.Namespace, settings: Settings) -> int:
         server.server_close()
     return 0
 
-
-def build_daily_scheduler(args: argparse.Namespace, settings: Settings, on_finish: Any = None) -> Any:
-    """Arm the once-a-day pass, from flags or the environment.
+def build_schedule(args: argparse.Namespace, settings: Settings, on_finish: Any = None) -> Any:
+    """Arm the scheduled passes, from flags or the environment.
 
     Lives inside the web process because the journal is SQLite on a volume,
     and a volume attaches to one service -- see docs/DEPLOY.md.
     """
     import os
 
-    from .scheduler import DailyScheduler, parse_time
+    from .scheduler import DailySchedule, ScheduledRun, describe, parse_schedule
 
-    at_text = args.daily or os.environ.get("PMBOT_DAILY_AT", "")
-    if not at_text:
+    spec = args.daily or os.environ.get("PMBOT_DAILY_AT", "")
+    if not spec:
         return None
+    runs = parse_schedule(spec)
 
     sports = args.daily_sport or [
         s.strip().lower()
@@ -599,26 +599,29 @@ def build_daily_scheduler(args: argparse.Namespace, settings: Settings, on_finis
     ]
     unknown = [s for s in sports if s not in SPORTS]
     if unknown:
-        raise ValueError(f"unknown sport(s) in the daily schedule: {', '.join(unknown)}")
+        raise ValueError(f"unknown sport(s) in the schedule: {', '.join(unknown)}")
 
     log_bets = args.daily_log or os.environ.get("PMBOT_DAILY_LOG_BETS", "").lower() in ("1", "true", "yes")
 
-    def job() -> str:
+    def job(run: ScheduledRun) -> str:
         import logging
 
         logger = logging.getLogger("pmbot.cron")
-        summary = run_cron_pass(settings, sports, log_bets=log_bets, emit=logger.info)
+        summary = run_cron_pass(
+            settings, sports, log_bets=log_bets, emit=logger.info, **run.skips()
+        )
         if on_finish:
-            on_finish()  # fresh logs mean the cached slate is stale
+            on_finish()  # fresh logs or lines mean the cached slate is stale
         return summary
 
     state_path = Path(settings.data.db).parent / "scheduler.json"
-    scheduler = DailyScheduler(job=job, at=parse_time(at_text), state_path=state_path)
+    schedule = DailySchedule(runs=runs, job=job, state_path=state_path)
     print(
-        f"daily pass armed for {at_text} UTC on {', '.join(sports)}"
+        f"schedule armed: {describe(runs)} UTC on {', '.join(sports)}"
         f"{' (logging bets)' if log_bets else ''}"
     )
-    return scheduler
+    return schedule
+
 
 def run_cron_pass(
     settings: Settings,
@@ -896,7 +899,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", help="defaults to $PMBOT_API_TOKEN")
     p.add_argument("--allow-anonymous", action="store_true", help="serve with no auth (private networks only)")
     p.add_argument("--scan-ttl", type=float, default=300.0, help="seconds to cache a slate scan")
-    p.add_argument("--daily", help="run the cron pass once a day at this UTC time, e.g. 16:00")
+    p.add_argument(
+        "--daily", action="append",
+        help="scheduled UTC pass(es); repeatable and comma-separated. '16:00' runs "
+             "every step, '23:00=close' runs only that one. e.g. --daily '16:00, 23:00=close'",
+    )
     p.add_argument("--daily-sport", action="append", choices=SPORTS, help="repeatable; defaults to nba")
     p.add_argument("--daily-log", action="store_true", help="the daily pass logs its bets to the journal")
     p.set_defaults(func=cmd_serve)

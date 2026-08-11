@@ -398,16 +398,23 @@ def render_dashboard(
 
 
 def _schedule_html(schedule: dict[str, Any] | None) -> str:
-    """Show the daily job's last outcome; a silent scheduler is a broken one."""
+    """Show the scheduled passes and how the last one went.
+
+    A scheduler you cannot see is one you cannot trust, so this reports every
+    entry -- including the ones that have never fired.
+    """
     if not schedule:
-        return "No daily pass armed. &nbsp;&middot;&nbsp; "
-    last = schedule.get("last_status")
-    when = schedule.get("last_finished_at") or "never"
-    state = {"ok": "ok", "failed": "FAILED", None: "not yet run"}.get(last, str(last))
+        return "No scheduled passes armed. &nbsp;&middot;&nbsp; "
+    entries = schedule.get("runs") or []
+    parts = []
+    for entry in entries:
+        state = {"ok": "ok", "failed": "FAILED"}.get(entry.get("last_status"), "not yet run")
+        parts.append(f"{_esc(entry['label'])} &rarr; {_esc(state)}")
+    latest = schedule.get("last_summary")
     return (
-        f"Daily pass {_esc(schedule.get('schedule_utc'))} UTC &middot; last {_esc(state)} "
-        f"({_esc(when)}) &middot; next {_esc(schedule.get('next_run', '?'))}"
-        f"{' &middot; ' + _esc(schedule['last_summary']) if schedule.get('last_summary') else ''}"
+        f"Schedule (UTC): {' &middot; '.join(parts)} &middot; next "
+        f"{_esc(schedule.get('next_run', '?'))}"
+        f"{' &middot; last: ' + _esc(latest) if latest else ''}"
         " &nbsp;&middot;&nbsp; "
     )
 

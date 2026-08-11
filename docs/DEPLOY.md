@@ -48,7 +48,7 @@ in one go:
 | `PMBOT_BANKROLL` | no | starting bankroll if the journal has no deposits yet |
 | `PMBOT_KELLY_FRACTION` | no | defaults to `0.25` |
 | `PMBOT_MIN_EV` | no | EV floor, defaults to `0.02` |
-| `PMBOT_DAILY_AT` | **for the daily job** | UTC time to run the daily pass, e.g. `16:00`. Unset means no scheduled run at all. |
+| `PMBOT_DAILY_AT` | **for scheduled runs** | UTC schedule, e.g. `16:00, 23:00=close`. A list; see below. Unset means nothing is scheduled. |
 | `PMBOT_DAILY_SPORTS` | no | comma-separated, defaults to `nba`. Use `nba,nfl` for both. |
 | `PMBOT_DAILY_LOG_BETS` | no | `1` makes the daily pass write its bets to the journal. Off by default — see below. |
 | `PMBOT_MC_SIMS` | no | lower it (e.g. `8000`) if a big slate is slow on a small instance |
@@ -60,29 +60,46 @@ Generate a token that isn't guessable:
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## 4. Turn on the daily run
+## 4. Turn on the scheduled runs
 
 Set two variables on the web service:
 
 ```
-PMBOT_DAILY_AT=16:00
+PMBOT_DAILY_AT=16:00, 23:00=close
 PMBOT_DAILY_SPORTS=nba,nfl
 ```
 
 That's it — no second service, no cron syntax. On boot the log says:
 
 ```
-daily pass armed for 16:00 UTC on nba, nfl
+schedule armed: 16:00 full, 23:00 close UTC on nba, nfl
 pmbot serving on http://0.0.0.0:8080 (auth: on)
 ```
 
-Each run, in order:
+### The schedule is a list
+
+Each entry is a UTC time, optionally with the steps to run at it:
+
+| entry | runs |
+|---|---|
+| `16:00` | every step: fetch, close, scan |
+| `23:00=close` | closing lines only |
+| `23:30=close+scan` | two of the three |
+| `16:00=full` | same as bare `16:00` (`all` works too) |
+
+The three steps:
 
 1. **fetch** — refresh game logs for every player on tonight's board
 2. **close** — stamp closing lines on bets still missing them, for CLV
-3. **scan** — price the slate and log what it would bet
+3. **scan** — price the slate and print what it would bet
 
-Then it drops the dashboard's scan cache so the page reflects the new logs.
+After any entry finishes it drops the dashboard's scan cache, so the page
+reflects the fresh data.
+
+Entries are tracked **separately**: each fires at its own time, each records
+its own outcome, and one failing doesn't affect the other. Two entries with
+the same time *and* steps are treated as a config slip and collapse into one;
+the same time with different steps is two real entries.
 
 **It does not write bets to the journal** unless you set
 `PMBOT_DAILY_LOG_BETS=1`. A journal is a record of wagers a person actually
@@ -100,41 +117,55 @@ curl -H "Authorization: Bearer $PMBOT_API_TOKEN" https://<app>/api/schedule
 ```
 ```json
 {
-  "enabled": true, "schedule_utc": "16:00", "running": true, "runs": 4,
-  "last_status": "ok", "last_finished_at": "2026-08-11T16:00:09+00:00",
-  "last_duration_seconds": 7.6, "last_summary": "nba: 2 bet(s); nfl: 1 bet(s)",
-  "next_run": "2026-08-12T16:00:00+00:00"
+  "enabled": true, "running": true,
+  "schedule": "16:00 full, 23:00 close",
+  "next_run": "2026-08-11T23:00:00+00:00",
+  "runs": [
+    {"label": "16:00 full", "steps": ["fetch", "close", "scan"], "runs": 4,
+     "last_status": "ok", "last_finished_at": "2026-08-11T16:00:09+00:00",
+     "last_duration_seconds": 7.6, "last_summary": "nba: 2 bet(s); nfl: 1 bet(s)",
+     "next_run": "2026-08-12T16:00:00+00:00"},
+    {"label": "23:00 close", "steps": ["close"], "runs": 3,
+     "last_status": "ok", "last_summary": "no scan",
+     "next_run": "2026-08-11T23:00:00+00:00"}
+  ]
 }
 ```
 
-The same summary sits in the dashboard footer, and in `/healthz` under
+Every entry shows in the dashboard footer, and in `/healthz` under
 `daily_job`.
 
 ### What it does about restarts and misses
 
-* **A redeploy doesn't re-run it.** State lives on the volume, keyed by UTC
-  date, so restarting at 16:05 after a 16:00 run does nothing.
-* **A missed window catches up.** Down at 16:00, up at 18:00 → it runs at
-  18:00. For a data refresh, late beats skipped.
+* **A redeploy doesn't re-run an entry.** State lives on the volume, keyed by
+  entry and UTC date, so restarting at 16:05 after a 16:00 run does nothing.
+* **A missed entry catches up.** Down at 16:00, up at 18:00 → it runs at
+  18:00. For a data refresh, late beats skipped. After a long outage every
+  overdue entry runs, in time order.
 * **A failure doesn't kill the loop or spin.** The day is claimed before the
-  job runs, so a job that fails in two seconds waits for tomorrow instead of
-  retrying in a tight loop. The error lands in `last_summary`.
+  entry runs, so one that fails in two seconds waits for tomorrow instead of
+  retrying in a tight loop. The error lands in that entry's `last_summary`.
 
-### Picking a time
+### Picking times
 
-`16:00` UTC (noon ET) is a reasonable default: late enough that lineups are
-firming, early enough to be ahead of evening slates.
+The suggested pair, and why:
 
-One honest caveat: **a once-daily job at noon is poor at capturing closing
-lines.** CLV wants a reading near lock. If you care about CLV — and you
-should, it's the metric that converges fastest — run the CLI closer to game
-time as well:
+* **`16:00`** (noon ET) — the full pass. Late enough that lineups are firming,
+  early enough to be ahead of evening slates.
+* **`23:00=close`** — closing lines only, near lock. **This is the entry that
+  makes CLV work.** A noon reading isn't the close, and CLV measured against a
+  number that still had hours to move is worth very little. It's also cheap:
+  no fetch, no scan, one odds call per market you have open.
 
-```bash
-pmbot close-all --sport nba     # near lock, on whatever schedule suits you
+Adjust the second one to sit just before your slate's first lock. If you bet
+several sports with different lock times, add an entry each:
+
+```
+PMBOT_DAILY_AT=16:00, 22:45=close, 23:45=close
 ```
 
-Run steps selectively with `--skip-fetch`, `--skip-close`, `--skip-scan`.
+The CLI equivalent for a one-off is `pmbot cron --sport nba --skip-fetch
+--skip-scan`, or just `pmbot close-all --sport nba`.
 
 ## 5. First run
 

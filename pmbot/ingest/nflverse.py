@@ -17,6 +17,8 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any, Sequence
 
+import logging
+
 from .base import (
     FetchedLogs,
     PlayerRef,
@@ -25,7 +27,9 @@ from .base import (
     fuzzy_candidates,
     resolve_one,
 )
-from .http import HttpClient
+from .http import FetchError, HttpClient
+
+log = logging.getLogger("pmbot.ingest.nflverse")
 
 BASE = "https://github.com/nflverse/nflverse-data/releases/download"
 WEEKLY_URL = BASE + "/player_stats/stats_player_week_{season}.csv"
@@ -65,8 +69,20 @@ class NflverseSource:
 
     # ------------------------------------------------------------------
     def _rows(self, season: int) -> list[dict[str, str]]:
+        """Rows for a season, or none if that season isn't published yet.
+
+        Asking for next season before week 1 is normal -- the default is the
+        last two -- and a 404 there must not sink the season that does exist.
+        Letting it propagate meant one missing file skipped every player.
+        """
         if season not in self._weekly:
-            self._weekly[season] = list(self.client.get_csv(WEEKLY_URL.format(season=season)))
+            try:
+                self._weekly[season] = list(self.client.get_csv(WEEKLY_URL.format(season=season)))
+            except FetchError as exc:
+                if "404" not in str(exc):
+                    raise
+                log.info("nflverse has no %s season file yet; skipping that season", season)
+                self._weekly[season] = []
         return self._weekly[season]
 
     def _schedule_index(self) -> dict[tuple[int, int, str], dict[str, str]]:
@@ -153,11 +169,35 @@ class NflverseSource:
 
     # ------------------------------------------------------------------
     def fetch(self, name: str, seasons: Sequence[int], team: str | None = None) -> FetchedLogs:
-        ref = resolve_one(name, self.search(name, max(seasons)), team=team)
+        ref = resolve_one(name, self._find(name, seasons), team=team)
         return FetchedLogs(
             player=ref.name, sport="nfl", source=self.name, ref=ref,
             games=self.game_logs(ref, seasons), seasons=tuple(seasons),
         )
+
+    def _find(self, name: str, seasons: Sequence[int]) -> list[PlayerRef]:
+        """Search the newest season with data, falling back to older ones.
+
+        The newest requested season may not be published yet, and an empty
+        roster there would report every player as unknown. If *no* requested
+        season has data, say that instead -- "unknown player" would send you
+        hunting for a spelling mistake that isn't there.
+        """
+        saw_data = False
+        for season in sorted(seasons, reverse=True):
+            if not self._rows(season):
+                continue
+            saw_data = True
+            found = self.search(name, season)
+            if found:
+                return found
+        if not saw_data:
+            raise FetchError(
+                f"nflverse has no data for season(s) "
+                f"{', '.join(str(s) for s in sorted(seasons))} -- not published yet. "
+                f"Try an earlier season with --seasons."
+            )
+        return []
 
 
 def week_to_date(season: int, week: int) -> date:

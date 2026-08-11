@@ -17,6 +17,7 @@ so the conversion happens here, in one place, rather than in every caller.
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Sequence
 
 from .base import (
@@ -27,8 +28,10 @@ from .base import (
     fuzzy_candidates,
     resolve_one,
 )
-from .http import HttpClient
+from .http import FetchError, HttpClient
 from .nba_stats import default_season
+
+log = logging.getLogger("pmbot.ingest.hoopr")
 
 BOX_URL = (
     "https://github.com/sportsdataverse/sportsdataverse-data/releases/download"
@@ -74,7 +77,15 @@ class HoopRSource:
         """Rows for a season, keyed by the season's *starting* year."""
         year = file_year(season)
         if year not in self._rows_by_year:
-            self._rows_by_year[year] = list(self.client.get_csv(BOX_URL.format(year=year)))
+            try:
+                self._rows_by_year[year] = list(self.client.get_csv(BOX_URL.format(year=year)))
+            except FetchError as exc:
+                # A season that hasn't tipped off yet has no file. Skip it
+                # rather than failing the seasons that do exist.
+                if "404" not in str(exc):
+                    raise
+                log.info("hoopR has no %s season file yet; skipping that season", year)
+                self._rows_by_year[year] = []
         return self._rows_by_year[year]
 
     # ------------------------------------------------------------------
@@ -122,12 +133,34 @@ class HoopRSource:
 
     # ------------------------------------------------------------------
     def fetch(self, name: str, seasons: Sequence[int], team: str | None = None) -> FetchedLogs:
-        ref = resolve_one(name, self.search(name, max(int(s) for s in seasons)), team=team)
+        ref = resolve_one(name, self._find(name, seasons), team=team)
         return FetchedLogs(
             player=ref.name, sport="nba", source=self.name, ref=ref,
             games=self.game_logs(ref, [int(s) for s in seasons]),
             seasons=tuple(int(s) for s in seasons),
         )
+
+    def _find(self, name: str, seasons: Sequence[int]) -> list[PlayerRef]:
+        """Search the newest season with data, falling back to older ones.
+
+        A season that hasn't tipped off has an empty roster, and searching it
+        alone would report every player as unknown.
+        """
+        saw_data = False
+        for season in sorted((int(s) for s in seasons), reverse=True):
+            if not self._rows(season):
+                continue
+            saw_data = True
+            found = self.search(name, season)
+            if found:
+                return found
+        if not saw_data:
+            raise FetchError(
+                f"hoopR has no data for season(s) "
+                f"{', '.join(str(s) for s in sorted(int(x) for x in seasons))} -- not "
+                f"published yet. Try an earlier season with --seasons."
+            )
+        return []
 
 
 def played(row: dict[str, str]) -> bool:
