@@ -72,6 +72,10 @@ class PmbotService:
         self.token = token
         self.cache = ScanCache(scan_ttl)
         self.started_at = datetime.now(timezone.utc)
+        # Set by the CLI when a daily pass is armed. Exposed so a deployed
+        # scheduler is observable -- otherwise you cannot tell a job that ran
+        # quietly from one that never fired at all.
+        self.scheduler: Any = None
 
     # ------------------------------------------------------------------
     def authorised(self, headers: Any, query: dict[str, list[str]]) -> bool:
@@ -107,7 +111,11 @@ class PmbotService:
             "odds_provider": self.settings.api.provider,
             "odds_key_configured": bool(self.settings.api.api_key),
             "authenticated": bool(self.token),
+            "daily_job": self.schedule_status(),
         }
+
+    def schedule_status(self) -> dict[str, Any] | None:
+        return self.scheduler.status() if self.scheduler else None
 
     def overview(self) -> dict[str, Any]:
         with self.journal() as journal:
@@ -187,6 +195,11 @@ class Handler(BaseHTTPRequestHandler):
                 with self.service.journal() as journal:
                     status = (query.get("status") or [None])[0]
                     return self.json([b.to_dict() for b in journal.bets(status=status)])
+            if path == "/api/schedule":
+                status = self.service.schedule_status()
+                if status is None:
+                    return self.json({"enabled": False, "detail": "no daily pass armed"})
+                return self.json({"enabled": True, **status})
             if path == "/api/config":
                 shown = self.service.settings.to_dict()
                 shown["api"]["api_key"] = "***" if shown["api"]["api_key"] else ""
@@ -230,6 +243,7 @@ class Handler(BaseHTTPRequestHandler):
             overview=self.service.overview(),
             token=token,
             error=error,
+            schedule=self.service.schedule_status(),
         )
 
 
@@ -316,6 +330,7 @@ def render_dashboard(
     overview: dict[str, Any],
     token: str = "",
     error: str | None = None,
+    schedule: dict[str, Any] | None = None,
 ) -> str:
     bank = overview["bankroll"]
     perf = overview["performance"]
@@ -378,8 +393,23 @@ def render_dashboard(
 {err}
 {rows}
 {open_table}
-<footer>Read-only. Place, settle and grade bets with the CLI &mdash; this page cannot.</footer>
+<footer>{_schedule_html(schedule)}Read-only. Place, settle and grade bets with the CLI &mdash; this page cannot.</footer>
 </div></body></html>"""
+
+
+def _schedule_html(schedule: dict[str, Any] | None) -> str:
+    """Show the daily job's last outcome; a silent scheduler is a broken one."""
+    if not schedule:
+        return "No daily pass armed. &nbsp;&middot;&nbsp; "
+    last = schedule.get("last_status")
+    when = schedule.get("last_finished_at") or "never"
+    state = {"ok": "ok", "failed": "FAILED", None: "not yet run"}.get(last, str(last))
+    return (
+        f"Daily pass {_esc(schedule.get('schedule_utc'))} UTC &middot; last {_esc(state)} "
+        f"({_esc(when)}) &middot; next {_esc(schedule.get('next_run', '?'))}"
+        f"{' &middot; ' + _esc(schedule['last_summary']) if schedule.get('last_summary') else ''}"
+        " &nbsp;&middot;&nbsp; "
+    )
 
 
 def _signal_html(s: Signal) -> str:
@@ -417,4 +447,7 @@ def make_server(
     handler = type("BoundHandler", (Handler,), {"service": service})
     server = ThreadingHTTPServer((host, port), handler)
     server.daemon_threads = True
+    # Callers need the service too -- to attach a scheduler, or to drop the
+    # scan cache once fresh game logs land.
+    server.service = service  # type: ignore[attr-defined]
     return server

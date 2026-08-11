@@ -287,12 +287,18 @@ markets` lists every supported market and the workload it's modelled against.
 
 Runs as a container anywhere; there's a Railway setup in
 [`docs/DEPLOY.md`](docs/DEPLOY.md) with a `Dockerfile` and `railway.toml`
-committed. Two services from one repo:
+committed. **One service** serves the dashboard and runs the daily refresh on
+an internal timer:
 
+```bash
+PMBOT_DAILY_AT=16:00 PMBOT_DAILY_SPORTS=nba,nfl   # arms the daily pass
 ```
-web    pmbot serve --host 0.0.0.0     read-only dashboard + JSON API
-cron   pmbot cron --sport nba         scheduled: refresh logs, stamp closes, scan
-```
+
+Each pass refreshes game logs for everyone on the board, stamps closing lines
+on bets still missing them, and prices the slate. It's one service rather than
+two because a hosted volume attaches to exactly one — a separate cron service
+would get its own empty journal and its work would vanish silently. Progress is
+visible at `/api/schedule` and in the dashboard footer.
 
 ```bash
 docker build -t pmbot .
@@ -311,10 +317,11 @@ Three things the deployment gets right on purpose:
   unless you pass `--allow-anonymous`. A platform URL is public and this page
   shows your balance and open positions. `/healthz` stays open so the platform
   can probe it.
-* **The web surface is read-only, and the cron job doesn't log bets unless you
-  ask.** Nothing served over HTTP can write to the journal, and `pmbot cron`
-  needs an explicit `--log` before it records anything. A journal full of bets
-  nobody placed destroys the only honest measurement you have.
+* **The web surface is read-only, and the daily pass doesn't log bets unless
+  you ask.** Nothing served over HTTP can write to the journal, and the
+  scheduled run needs `PMBOT_DAILY_LOG_BETS=1` (or `--log` on the CLI) before
+  it records anything. A journal full of bets nobody placed destroys the only
+  honest measurement you have.
 
 Scans are cached (`--scan-ttl`, default 300s) because a full slate is thousands
 of simulations and a held-down refresh key would otherwise peg the CPU.
@@ -363,10 +370,11 @@ pmbot/
   providers/      The Odds API client, file-backed providers
   ingest/         real game logs: nflverse, hoopR, MLB Stats API, stats.nba.com
   server.py       read-only dashboard + JSON API (stdlib http.server)
+  scheduler.py    the daily pass, run in-process so it shares the volume
   cli.py          the command line
 ```
 
-Run the tests with `pytest` (374 of them, no network, ~17s). Two opt-in live
+Run the tests with `pytest` (410 of them, no network, ~17s). Two opt-in live
 checks hit the real nflverse and hoopR feeds: `PMBOT_LIVE_TESTS=1 pytest -k live`.
 
 ---

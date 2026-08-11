@@ -1,8 +1,12 @@
-# Railway service definition for the pmbot dashboard.
+# Railway service definition for pmbot.
 #
-# This file configures ONE service: the read-only web dashboard. The scheduled
-# refresh runs as a second service from the same repo -- see docs/DEPLOY.md,
-# because a cron service needs its own start command and schedule.
+# ONE service does both jobs: it serves the dashboard and runs the daily
+# refresh on an internal timer. Set PMBOT_DAILY_AT (e.g. "16:00") to arm the
+# daily pass; leave it unset for a dashboard only.
+#
+# Do NOT split the refresh into a second Railway service. A volume attaches to
+# exactly one service, so the second one gets an empty journal and its work
+# goes nowhere -- silently. See docs/DEPLOY.md.
 
 [build]
 builder = "dockerfile"

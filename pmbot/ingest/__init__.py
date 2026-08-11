@@ -28,7 +28,7 @@ from .http import FetchError, HttpClient
 from .mlb_statsapi import MlbStatsApiSource
 from .nba_stats import NbaStatsSource
 from .nflverse import NflverseSource
-from .store import merge_games, path_for, summarise_file, write_logs
+from .store import SampleDataProtected, merge_games, path_for, summarise_file, write_logs
 
 __all__ = [
     "build_source",
@@ -42,6 +42,7 @@ __all__ = [
     "UnknownPlayer",
     "AmbiguousPlayer",
     "write_logs",
+    "SampleDataProtected",
     "merge_games",
     "path_for",
     "summarise_file",

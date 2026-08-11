@@ -232,6 +232,16 @@ class TestCron:
             _, listing = run(capsys, "--db", db, "bets")
             assert "pending" in listing
 
+    def test_a_fetch_step_cannot_overwrite_the_fixture(self, capsys, db):
+        """--sample plus a fetching pass used to replace synthetic logs."""
+        import json
+        from pathlib import Path
+
+        target = Path("data/sample/gamelogs/nba/anthony-edwards.json")
+        before = json.loads(target.read_text())
+        run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-scan", "--skip-close")
+        assert json.loads(target.read_text())["source"] == before["source"] == "synthetic"
+
     def test_bankroll_defaults_to_the_journal_balance(self, capsys, db):
         run(capsys, "--db", db, "bankroll", "--deposit", "12345")
         _, out = run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-fetch", "--skip-close")

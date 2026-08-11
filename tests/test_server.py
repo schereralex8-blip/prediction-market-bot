@@ -130,6 +130,35 @@ class TestRoutes:
             assert response.status == 200
 
 
+class TestScheduleRoute:
+    def test_it_says_so_when_nothing_is_armed(self, server):
+        payload = json.loads(get(f"{server}/api/schedule", TOKEN)[1])
+        assert payload["enabled"] is False
+
+    def test_an_armed_job_is_visible(self, settings):
+        """A scheduler you cannot observe is one you cannot trust."""
+        from datetime import time as dtime
+
+        from pmbot.scheduler import DailyScheduler
+
+        srv = make_server(settings, host="127.0.0.1", port=0, token=TOKEN)
+        srv.service.scheduler = DailyScheduler(
+            job=lambda: "nba: 2 bet(s)", at=dtime(16, 0),
+            state_path=settings.data.db + ".sched.json",
+        )
+        thread = threading.Thread(target=srv.serve_forever, daemon=True)
+        thread.start()
+        try:
+            base = f"http://127.0.0.1:{srv.server_address[1]}"
+            payload = json.loads(get(f"{base}/api/schedule", TOKEN)[1])
+            assert payload["enabled"] is True
+            assert payload["schedule_utc"] == "16:00"
+            assert json.loads(get(f"{base}/healthz")[1])["daily_job"]["schedule_utc"] == "16:00"
+        finally:
+            srv.shutdown()
+            srv.server_close()
+
+
 class TestScanCache:
     def test_the_first_call_computes(self):
         cache = ScanCache(ttl=60)
@@ -198,6 +227,20 @@ class TestDashboardRendering:
         html = render_dashboard(sport="nba", signals=[signal], age=0.0, overview=self.overview())
         assert "<img src=x" not in html
 
+    def test_the_daily_job_is_shown_in_the_footer(self):
+        html = render_dashboard(
+            sport="nba", signals=[], age=0.0, overview=self.overview(),
+            schedule={"schedule_utc": "16:00", "last_status": "ok",
+                      "last_finished_at": "2026-08-11T16:00:09+00:00",
+                      "next_run": "2026-08-12T16:00:00+00:00",
+                      "last_summary": "nba: 2 bet(s)"},
+        )
+        assert "Daily pass 16:00 UTC" in html and "nba: 2 bet(s)" in html
+
+    def test_a_missing_daily_job_is_called_out(self):
+        html = render_dashboard(sport="nba", signals=[], age=0.0, overview=self.overview())
+        assert "No daily pass armed" in html
+
     def test_an_empty_board_says_so(self):
         html = render_dashboard(sport="nba", signals=[], age=0.0, overview=self.overview())
         assert "Nothing on the board" in html
@@ -223,7 +266,13 @@ class TestServeCommand:
         monkeypatch.delenv("PMBOT_API_TOKEN", raising=False)
         started = {}
 
+        class FakeService:
+            cache = ScanCache(ttl=1)
+            scheduler = None
+
         class FakeServer:
+            service = FakeService()
+
             def serve_forever(self):
                 started["ran"] = True
 

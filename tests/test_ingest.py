@@ -42,7 +42,7 @@ from pmbot.ingest.nba_stats import (
     rows_to_dicts,
 )
 from pmbot.ingest.nflverse import NflverseSource, week_to_date
-from pmbot.ingest.store import path_for, summarise_file
+from pmbot.ingest.store import SampleDataProtected, path_for, summarise_file
 
 
 class FakeClient:
@@ -656,6 +656,26 @@ class TestStore:
         assert logs[0].stats["pass_yards"] == 232
         assert logs[0].opponent == "ARI" and logs[0].is_home
         assert "home" not in logs[0].stats  # a bool is not a stat
+
+    def test_the_synthetic_fixture_cannot_be_overwritten(self, tmp_path):
+        """The guard must sit here, not in the CLI: the scheduler writes too.
+
+        It didn't, once, and the daily job promptly replaced four synthetic
+        NBA fixtures with real logs -- which looked fine until the sample
+        slate started pricing real form against invented lines.
+        """
+        sample = tmp_path / "data" / "sample" / "gamelogs"
+        with pytest.raises(SampleDataProtected, match="refusing to write"):
+            write_logs(fetched([{"date": "2024-09-08"}]), sample)
+        assert not (sample / "nfl").exists()
+
+    def test_the_fixture_generator_can_still_write_there(self, tmp_path):
+        sample = tmp_path / "data" / "sample" / "gamelogs"
+        path = write_logs(fetched([{"date": "2024-09-08"}]), sample, allow_sample=True)
+        assert path.exists()
+
+    def test_ordinary_paths_are_unaffected(self, tmp_path):
+        assert write_logs(fetched([{"date": "2024-09-08"}]), tmp_path / "gamelogs").exists()
 
     def test_summary_line_is_informative(self, tmp_path):
         path = write_logs(fetched([{"date": "2024-09-08"}, {"date": "2024-12-01"}]), tmp_path)

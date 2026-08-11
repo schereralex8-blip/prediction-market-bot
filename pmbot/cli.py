@@ -560,91 +560,189 @@ def cmd_serve(args: argparse.Namespace, settings: Settings) -> int:
         print("WARNING: serving with no authentication -- anyone with the URL sees your journal.")
 
     server = make_server(settings, host=args.host, port=port, token=token or None, scan_ttl=args.scan_ttl)
+
+    scheduler = build_daily_scheduler(args, settings, on_finish=server.service.cache.clear)
+    if scheduler:
+        server.service.scheduler = scheduler
+        scheduler.start()
+
     print(f"pmbot serving on http://{args.host}:{port} (auth: {'on' if token else 'OFF'})")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nshutting down")
     finally:
+        if scheduler:
+            scheduler.stop()
         server.server_close()
     return 0
 
 
-def cmd_cron(args: argparse.Namespace, settings: Settings) -> int:
-    """One scheduled pass: refresh logs, snapshot odds, scan, record closings.
+def build_daily_scheduler(args: argparse.Namespace, settings: Settings, on_finish: Any = None) -> Any:
+    """Arm the once-a-day pass, from flags or the environment.
 
-    Written to be run by a scheduler. Every step is opt-out except logging
-    bets, which is opt-*in*: a journal should only ever contain wagers a
-    person actually placed.
+    Lives inside the web process because the journal is SQLite on a volume,
+    and a volume attaches to one service -- see docs/DEPLOY.md.
     """
-    from .ingest import FetchError, HttpClient, build_source, default_seasons, write_logs
+    import os
+
+    from .scheduler import DailyScheduler, parse_time
+
+    at_text = args.daily or os.environ.get("PMBOT_DAILY_AT", "")
+    if not at_text:
+        return None
+
+    sports = args.daily_sport or [
+        s.strip().lower()
+        for s in os.environ.get("PMBOT_DAILY_SPORTS", "nba").split(",")
+        if s.strip()
+    ]
+    unknown = [s for s in sports if s not in SPORTS]
+    if unknown:
+        raise ValueError(f"unknown sport(s) in the daily schedule: {', '.join(unknown)}")
+
+    log_bets = args.daily_log or os.environ.get("PMBOT_DAILY_LOG_BETS", "").lower() in ("1", "true", "yes")
+
+    def job() -> str:
+        import logging
+
+        logger = logging.getLogger("pmbot.cron")
+        summary = run_cron_pass(settings, sports, log_bets=log_bets, emit=logger.info)
+        if on_finish:
+            on_finish()  # fresh logs mean the cached slate is stale
+        return summary
+
+    state_path = Path(settings.data.db).parent / "scheduler.json"
+    scheduler = DailyScheduler(job=job, at=parse_time(at_text), state_path=state_path)
+    print(
+        f"daily pass armed for {at_text} UTC on {', '.join(sports)}"
+        f"{' (logging bets)' if log_bets else ''}"
+    )
+    return scheduler
+
+def run_cron_pass(
+    settings: Settings,
+    sports: Sequence[str],
+    *,
+    bankroll: float | None = None,
+    log_bets: bool = False,
+    skip_fetch: bool = False,
+    skip_scan: bool = False,
+    skip_close: bool = False,
+    source: str | None = None,
+    season_count: int = 2,
+    emit: Any = print,
+) -> str:
+    """One scheduled pass over each sport. Returns a one-line summary.
+
+    Shared by the `cron` command and the in-process daily scheduler, so both
+    do exactly the same work. Every step is opt-out except logging bets, which
+    is opt-*in*: a journal should only ever hold wagers a person placed.
+
+    A failing step is recorded and the pass continues -- a dead odds feed
+    shouldn't stop the game logs refreshing.
+    """
+    from .ingest import (
+        FetchError,
+        HttpClient,
+        SampleDataProtected,
+        build_source,
+        default_seasons,
+        write_logs,
+    )
 
     started = datetime.now(timezone.utc)
-    print(f"=== pmbot cron {args.sport.upper()} {started:%Y-%m-%d %H:%M UTC}")
+    notes: list[str] = []
     failures = 0
 
-    if not args.skip_fetch:
-        try:
-            provider = build_odds_provider(settings)
-            props = provider.player_props(args.sport, market_keys(args.sport))
-            players = sorted({p.player for p in props})
-            print(f"[fetch] {len(players)} player(s) on the board")
-            source = build_source(
-                args.sport, args.source, client=HttpClient(cache_dir=settings.data.ingest_cache)
-            )
-            seasons = default_seasons(args.sport, args.season_count)
-            written = 0
-            for name in players:
-                try:
-                    fetched = source.fetch(name, seasons)
-                except (LookupError, FetchError) as exc:
-                    print(f"[fetch] skip {name}: {exc}")
-                    continue
-                if fetched.games:
-                    write_logs(fetched, settings.data.gamelogs)
-                    written += 1
-            print(f"[fetch] refreshed {written} player(s) from {source.name}")
-        except Exception as exc:  # noqa: BLE001 - one broken step shouldn't kill the run
-            print(f"[fetch] FAILED: {exc}")
-            failures += 1
+    for sport in sports:
+        emit(f"=== {sport.upper()} {started:%Y-%m-%d %H:%M UTC}")
 
-    if not args.skip_close:
-        try:
-            with Journal(settings.data.db) as journal:
-                pending = sorted({b.market for b in journal.bets() if b.closing_fair_prob is None})
-                if pending:
-                    provider = build_odds_provider(settings)
-                    props = provider.player_props(args.sport, pending)
-                    updated = journal.record_closing_from_props(props, devig_method=settings.devig.method)
-                    print(f"[close] stamped closing lines on {len(updated)} bet(s)")
-                else:
-                    print("[close] nothing waiting on a closing line")
-        except Exception as exc:  # noqa: BLE001
-            print(f"[close] FAILED: {exc}")
-            failures += 1
+        if not skip_fetch:
+            try:
+                provider = build_odds_provider(settings)
+                props = provider.player_props(sport, market_keys(sport))
+                players = sorted({p.player for p in props})
+                emit(f"[fetch] {len(players)} player(s) on the board")
+                log_source = build_source(
+                    sport, source, client=HttpClient(cache_dir=settings.data.ingest_cache)
+                )
+                seasons = default_seasons(sport, season_count)
+                written = 0
+                for name in players:
+                    try:
+                        fetched = log_source.fetch(name, seasons)
+                    except (LookupError, FetchError) as exc:
+                        emit(f"[fetch] skip {name}: {exc}")
+                        continue
+                    if fetched.games:
+                        write_logs(fetched, settings.data.gamelogs)
+                        written += 1
+                emit(f"[fetch] refreshed {written} player(s) from {log_source.name}")
+            except Exception as exc:  # noqa: BLE001 - one broken step must not end the pass
+                emit(f"[fetch] FAILED: {exc}")
+                failures += 1
 
-    if not args.skip_scan:
-        try:
-            bankroll = args.bankroll
-            if bankroll is None:
+        if not skip_close:
+            try:
                 with Journal(settings.data.db) as journal:
-                    balance = journal.balance()
-                bankroll = balance if balance > 0 else settings.staking.bankroll
-            signals = PropScanner(settings).scan(args.sport, bankroll=bankroll, include_passes=False)
-            print(f"[scan] {len(signals)} bet(s) at bankroll {money(bankroll)}")
-            for sig in signals:
-                print("  " + sig.headline())
-            if args.log and signals:
-                with Journal(settings.data.db) as journal:
-                    ids = [journal.log_signal(s, bankroll=bankroll) for s in signals]
-                print(f"[scan] logged bet(s) {ids}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"[scan] FAILED: {exc}")
-            failures += 1
+                    pending = sorted({b.market for b in journal.bets() if b.closing_fair_prob is None})
+                    if pending:
+                        provider = build_odds_provider(settings)
+                        props = provider.player_props(sport, pending)
+                        updated = journal.record_closing_from_props(
+                            props, devig_method=settings.devig.method
+                        )
+                        emit(f"[close] stamped closing lines on {len(updated)} bet(s)")
+                    else:
+                        emit("[close] nothing waiting on a closing line")
+            except Exception as exc:  # noqa: BLE001
+                emit(f"[close] FAILED: {exc}")
+                failures += 1
+
+        if not skip_scan:
+            try:
+                roll = bankroll
+                if roll is None:
+                    with Journal(settings.data.db) as journal:
+                        balance = journal.balance()
+                    roll = balance if balance > 0 else settings.staking.bankroll
+                signals = PropScanner(settings).scan(sport, bankroll=roll, include_passes=False)
+                emit(f"[scan] {len(signals)} bet(s) at bankroll {money(roll)}")
+                for sig in signals:
+                    emit("  " + sig.headline())
+                if log_bets and signals:
+                    with Journal(settings.data.db) as journal:
+                        ids = [journal.log_signal(s, bankroll=roll) for s in signals]
+                    emit(f"[scan] logged bet(s) {ids}")
+                notes.append(f"{sport}: {len(signals)} bet(s)")
+            except Exception as exc:  # noqa: BLE001
+                emit(f"[scan] FAILED: {exc}")
+                failures += 1
+                notes.append(f"{sport}: scan failed")
 
     elapsed = (datetime.now(timezone.utc) - started).total_seconds()
-    print(f"=== done in {elapsed:.1f}s, {failures} step(s) failed")
-    return 1 if failures else 0
+    summary = "; ".join(notes) if notes else "no scan"
+    if failures:
+        summary += f" ({failures} step(s) failed)"
+    emit(f"=== done in {elapsed:.1f}s, {failures} step(s) failed")
+    return summary
+
+
+def cmd_cron(args: argparse.Namespace, settings: Settings) -> int:
+    sports = args.sport or ["nba"]
+    summary = run_cron_pass(
+        settings,
+        sports,
+        bankroll=args.bankroll,
+        log_bets=args.log,
+        skip_fetch=args.skip_fetch,
+        skip_scan=args.skip_scan,
+        skip_close=args.skip_close,
+        source=args.source,
+        season_count=args.season_count,
+    )
+    return 1 if "failed" in summary else 0
 
 
 def cmd_config(args: argparse.Namespace, settings: Settings) -> int:
@@ -798,11 +896,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", help="defaults to $PMBOT_API_TOKEN")
     p.add_argument("--allow-anonymous", action="store_true", help="serve with no auth (private networks only)")
     p.add_argument("--scan-ttl", type=float, default=300.0, help="seconds to cache a slate scan")
+    p.add_argument("--daily", help="run the cron pass once a day at this UTC time, e.g. 16:00")
+    p.add_argument("--daily-sport", action="append", choices=SPORTS, help="repeatable; defaults to nba")
+    p.add_argument("--daily-log", action="store_true", help="the daily pass logs its bets to the journal")
     p.set_defaults(func=cmd_serve)
 
     # -- cron
     p = sub.add_parser("cron", help="one scheduled pass: fetch, close, scan")
-    p.add_argument("--sport", required=True, choices=SPORTS)
+    p.add_argument("--sport", action="append", choices=SPORTS, help="repeatable; defaults to nba")
     p.add_argument("--bankroll", type=float, help="defaults to the journal balance")
     p.add_argument("--log", action="store_true", help="write the recommended bets to the journal")
     p.add_argument("--skip-fetch", action="store_true")

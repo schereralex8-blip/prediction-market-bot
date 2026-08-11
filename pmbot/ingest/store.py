@@ -19,6 +19,13 @@ from ..providers.base import slugify
 from .base import FetchedLogs
 
 
+SAMPLE_DIR = "sample"
+
+
+class SampleDataProtected(RuntimeError):
+    """Someone tried to write fetched data over the synthetic fixture."""
+
+
 def path_for(root: str | Path, sport: str, player: str) -> Path:
     return Path(root) / sport / f"{slugify(player)}.json"
 
@@ -27,9 +34,22 @@ def write_logs(
     fetched: FetchedLogs,
     root: str | Path = "data/gamelogs",
     merge: bool = True,
+    allow_sample: bool = False,
 ) -> Path:
     """Write (or merge into) ``<root>/<sport>/<player-slug>.json``."""
     target = path_for(root, fetched.sport, fetched.player)
+
+    # The guard lives here rather than in the CLI because there is more than
+    # one way in: the fetch command, the daily scheduler, a script. Guarding
+    # only the command left the scheduler free to overwrite the fixture with
+    # real logs, which it duly did.
+    if not allow_sample and SAMPLE_DIR in target.parts:
+        raise SampleDataProtected(
+            f"refusing to write fetched {fetched.sport} logs into the synthetic "
+            f"fixture at {target}. Real logs belong in data/gamelogs; mixing the "
+            f"two prices real form against invented lines."
+        )
+
     target.parent.mkdir(parents=True, exist_ok=True)
 
     games = list(fetched.games)
