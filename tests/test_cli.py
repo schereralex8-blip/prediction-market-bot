@@ -207,6 +207,37 @@ class TestFetch:
         assert "--player" in out and "--from-props" in out
 
 
+class TestCron:
+    def test_a_pass_runs_and_reports_each_step(self, capsys, db):
+        code, out = run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-fetch")
+        assert code == 0
+        assert "[close]" in out and "[scan]" in out
+        assert "step(s) failed" in out
+
+    def test_steps_can_be_skipped(self, capsys, db):
+        _, out = run(capsys, "--db", db, "cron", "--sport", "nba",
+                     "--skip-fetch", "--skip-scan", "--skip-close")
+        assert "[scan]" not in out and "[close]" not in out
+
+    def test_it_does_not_log_bets_unless_asked(self, capsys, db):
+        """A journal of bets nobody placed destroys the only honest measure."""
+        run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-fetch")
+        _, listing = run(capsys, "--db", db, "bets")
+        assert "no bets recorded yet" in listing
+
+    def test_log_opts_in(self, capsys, db):
+        run(capsys, "--db", db, "bankroll", "--deposit", "5000")
+        _, out = run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-fetch", "--log")
+        if "logged bet(s)" in out:
+            _, listing = run(capsys, "--db", db, "bets")
+            assert "pending" in listing
+
+    def test_bankroll_defaults_to_the_journal_balance(self, capsys, db):
+        run(capsys, "--db", db, "bankroll", "--deposit", "12345")
+        _, out = run(capsys, "--db", db, "cron", "--sport", "nba", "--skip-fetch", "--skip-close")
+        assert "12,345.00" in out
+
+
 class TestErrors:
     def test_a_missing_subcommand_exits_nonzero(self, capsys):
         with pytest.raises(SystemExit):

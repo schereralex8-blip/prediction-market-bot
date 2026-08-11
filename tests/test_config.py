@@ -61,6 +61,43 @@ class TestEnvironment:
         assert Settings.load(tmp_path / "absent.json").staking.bankroll == Settings().staking.bankroll
 
 
+class TestDataDir:
+    """One env var has to move every writable path, or a volume mount is a trap."""
+
+    def test_data_dir_moves_everything_writable(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("PMBOT_DATA_DIR", str(tmp_path))
+        data = Settings.load(tmp_path / "absent.json").data
+        assert data.db == str(tmp_path / "pmbot.sqlite3")
+        assert data.gamelogs == str(tmp_path / "gamelogs")
+        assert data.props == str(tmp_path / "props")
+        assert data.cache.startswith(str(tmp_path))
+        assert data.ingest_cache.startswith(str(tmp_path))
+
+    def test_the_repo_defense_table_survives_an_empty_volume(self, monkeypatch, tmp_path):
+        """Losing every matchup adjustment silently would be worse than loud."""
+        monkeypatch.setenv("PMBOT_DATA_DIR", str(tmp_path))
+        assert Settings.load(tmp_path / "absent.json").data.defense == "data/defense.json"
+
+    def test_a_volume_defense_table_wins_when_present(self, monkeypatch, tmp_path):
+        (tmp_path / "defense.json").write_text("{}")
+        monkeypatch.setenv("PMBOT_DATA_DIR", str(tmp_path))
+        assert Settings.load(tmp_path / "absent.json").data.defense == str(tmp_path / "defense.json")
+
+    def test_an_explicit_db_still_wins(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("PMBOT_DATA_DIR", str(tmp_path))
+        monkeypatch.setenv("PMBOT_DB", "/elsewhere/journal.sqlite3")
+        assert Settings.load(tmp_path / "absent.json").data.db == "/elsewhere/journal.sqlite3"
+
+    def test_deployment_knobs_are_settable_from_the_environment(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("PMBOT_MC_SIMS", "4000")
+        monkeypatch.setenv("PMBOT_MIN_EV", "0.05")
+        monkeypatch.setenv("PMBOT_MAX_BET_FRACTION", "0.01")
+        s = Settings.load(tmp_path / "absent.json")
+        assert s.models.mc_sims == 4000
+        assert s.staking.min_ev == 0.05
+        assert s.staking.max_bet_fraction == 0.01
+
+
 class TestSerialisation:
     def test_round_trips_through_disk(self, tmp_path):
         original = Settings()

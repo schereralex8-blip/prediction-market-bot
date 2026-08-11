@@ -1,0 +1,20 @@
+# Railway service definition for the pmbot dashboard.
+#
+# This file configures ONE service: the read-only web dashboard. The scheduled
+# refresh runs as a second service from the same repo -- see docs/DEPLOY.md,
+# because a cron service needs its own start command and schedule.
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "pmbot serve --host 0.0.0.0"
+healthcheckPath = "/healthz"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
+# One instance. The journal is SQLite on a volume, and a volume attaches to a
+# single instance -- scaling this past 1 would corrupt the thing it exists to
+# protect.
+numReplicas = 1

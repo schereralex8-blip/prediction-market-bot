@@ -94,6 +94,24 @@ class DataSettings:
     defense: str = "data/defense.json"
     db: str = "pmbot.sqlite3"
     cache: str = ".cache/odds"
+    ingest_cache: str = ".cache/ingest"
+
+    def use_data_dir(self, root: str | Path) -> "DataSettings":
+        """Move every writable path under one root, e.g. a mounted volume.
+
+        ``defense.json`` is the exception: if the volume doesn't carry one,
+        the repo's neutral template is kept rather than silently losing all
+        matchup adjustments.
+        """
+        base = Path(root)
+        self.gamelogs = str(base / "gamelogs")
+        self.props = str(base / "props")
+        self.db = str(base / "pmbot.sqlite3")
+        self.cache = str(base / "cache" / "odds")
+        self.ingest_cache = str(base / "cache" / "ingest")
+        if (base / "defense.json").exists():
+            self.defense = str(base / "defense.json")
+        return self
 
     def use_sample(self) -> "DataSettings":
         """Point at the synthetic slate under ``data/sample``.
@@ -159,13 +177,25 @@ class Settings:
         return self
 
     def apply_env(self) -> "Settings":
+        # A mounted volume moves every writable path in one go. On a platform
+        # with an ephemeral filesystem this is the difference between a
+        # journal and a goldfish.
+        data_dir = os.environ.get("PMBOT_DATA_DIR")
+        if data_dir:
+            self.data.use_data_dir(data_dir)
+
         env_map = {
             "PMBOT_ODDS_API_KEY": ("api", "api_key"),
             "PMBOT_PROVIDER": ("api", "provider"),
             "PMBOT_DB": ("data", "db"),
+            "PMBOT_GAMELOGS": ("data", "gamelogs"),
+            "PMBOT_PROPS": ("data", "props"),
             "PMBOT_BANKROLL": ("staking", "bankroll"),
             "PMBOT_KELLY_FRACTION": ("staking", "kelly_fraction"),
+            "PMBOT_MAX_BET_FRACTION": ("staking", "max_bet_fraction"),
+            "PMBOT_MIN_EV": ("staking", "min_ev"),
             "PMBOT_DEVIG": ("devig", "method"),
+            "PMBOT_MC_SIMS": ("models", "mc_sims"),
         }
         for env_key, (section, key) in env_map.items():
             raw = os.environ.get(env_key)

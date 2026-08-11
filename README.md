@@ -283,6 +283,44 @@ markets` lists every supported market and the workload it's modelled against.
 
 ---
 
+## Deploying it
+
+Runs as a container anywhere; there's a Railway setup in
+[`docs/DEPLOY.md`](docs/DEPLOY.md) with a `Dockerfile` and `railway.toml`
+committed. Two services from one repo:
+
+```
+web    pmbot serve --host 0.0.0.0     read-only dashboard + JSON API
+cron   pmbot cron --sport nba         scheduled: refresh logs, stamp closes, scan
+```
+
+```bash
+docker build -t pmbot .
+docker run -p 8080:8080 -v pmbot-data:/data \
+  -e PMBOT_API_TOKEN=$(python3 -c "import secrets;print(secrets.token_urlsafe(32))") \
+  -e PMBOT_ODDS_API_KEY=... pmbot
+```
+
+Three things the deployment gets right on purpose:
+
+* **`PMBOT_DATA_DIR` moves every writable path at once** — journal, game logs,
+  snapshots, HTTP caches. Point it at a mounted volume. Hosted filesystems are
+  wiped on redeploy, and a bankroll tracker that quietly resets to zero every
+  time you push is worse than no bankroll tracker.
+* **Auth is mandatory.** The server refuses to start without `PMBOT_API_TOKEN`
+  unless you pass `--allow-anonymous`. A platform URL is public and this page
+  shows your balance and open positions. `/healthz` stays open so the platform
+  can probe it.
+* **The web surface is read-only, and the cron job doesn't log bets unless you
+  ask.** Nothing served over HTTP can write to the journal, and `pmbot cron`
+  needs an explicit `--log` before it records anything. A journal full of bets
+  nobody placed destroys the only honest measurement you have.
+
+Scans are cached (`--scan-ttl`, default 300s) because a full slate is thousands
+of simulations and a held-down refresh key would otherwise peg the CPU.
+
+---
+
 ## Configuration
 
 `pmbot config` prints the effective settings; `pmbot config --write` saves them
@@ -300,6 +338,9 @@ notes which direction is dangerous. The ones that matter:
 | `staking.kelly_fraction` | `0.25` | quarter Kelly |
 | `staking.max_bet_fraction` | `0.02` | single-bet ceiling |
 | `staking.min_price_edge` | `0.02` | 2 points of probability over breakeven |
+
+Deployment variables: `PMBOT_DATA_DIR` (volume mount — moves db, logs, caches),
+`PMBOT_API_TOKEN` (dashboard auth), `PORT`.
 
 Env overrides: `PMBOT_ODDS_API_KEY`, `PMBOT_BANKROLL`, `PMBOT_KELLY_FRACTION`,
 `PMBOT_DEVIG`, `PMBOT_DB`, `PMBOT_PROVIDER`, `PMBOT_CONFIG`.
@@ -321,10 +362,11 @@ pmbot/
   journal/        SQLite storage, settlement, ROI / CLV / calibration
   providers/      The Odds API client, file-backed providers
   ingest/         real game logs: nflverse, hoopR, MLB Stats API, stats.nba.com
+  server.py       read-only dashboard + JSON API (stdlib http.server)
   cli.py          the command line
 ```
 
-Run the tests with `pytest` (338 of them, no network, ~7s). Two opt-in live
+Run the tests with `pytest` (374 of them, no network, ~17s). Two opt-in live
 checks hit the real nflverse and hoopR feeds: `PMBOT_LIVE_TESTS=1 pytest -k live`.
 
 ---

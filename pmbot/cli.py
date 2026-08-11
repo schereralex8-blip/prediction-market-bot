@@ -482,7 +482,7 @@ def cmd_fetch(args: argparse.Namespace, settings: Settings) -> int:
         if args.seasons
         else default_seasons(args.sport, args.season_count)
     )
-    client = HttpClient(cache_dir=args.cache or ".cache/ingest", offline=args.offline)
+    client = HttpClient(cache_dir=args.cache or settings.data.ingest_cache, offline=args.offline)
     source = build_source(args.sport, args.source, client=client)
     print(
         f"fetching {args.sport.upper()} logs for {len(players)} player(s) "
@@ -533,6 +533,118 @@ def cmd_sources(args: argparse.Namespace, settings: Settings) -> int:
             print(f"  {marker} {name:<16} {SOURCE_NOTES.get(name, '')}")
     print("\n* = default. Pick another with --source.")
     return 0
+
+
+def cmd_serve(args: argparse.Namespace, settings: Settings) -> int:
+    """Run the read-only dashboard / JSON API."""
+    import logging
+    import os
+
+    from .server import make_server
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    port = args.port or int(os.environ.get("PORT", 8080))
+    token = args.token or os.environ.get("PMBOT_API_TOKEN", "")
+
+    if not token and not args.allow_anonymous:
+        print(
+            "refusing to start without authentication.\n\n"
+            "This service exposes your bankroll, open positions and betting history, "
+            "and a hosted URL is public by default.\n"
+            "Set PMBOT_API_TOKEN to a long random string, or pass --allow-anonymous "
+            "if you are genuinely binding to a private network.",
+            file=sys.stderr,
+        )
+        return 2
+    if not token:
+        print("WARNING: serving with no authentication -- anyone with the URL sees your journal.")
+
+    server = make_server(settings, host=args.host, port=port, token=token or None, scan_ttl=args.scan_ttl)
+    print(f"pmbot serving on http://{args.host}:{port} (auth: {'on' if token else 'OFF'})")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nshutting down")
+    finally:
+        server.server_close()
+    return 0
+
+
+def cmd_cron(args: argparse.Namespace, settings: Settings) -> int:
+    """One scheduled pass: refresh logs, snapshot odds, scan, record closings.
+
+    Written to be run by a scheduler. Every step is opt-out except logging
+    bets, which is opt-*in*: a journal should only ever contain wagers a
+    person actually placed.
+    """
+    from .ingest import FetchError, HttpClient, build_source, default_seasons, write_logs
+
+    started = datetime.now(timezone.utc)
+    print(f"=== pmbot cron {args.sport.upper()} {started:%Y-%m-%d %H:%M UTC}")
+    failures = 0
+
+    if not args.skip_fetch:
+        try:
+            provider = build_odds_provider(settings)
+            props = provider.player_props(args.sport, market_keys(args.sport))
+            players = sorted({p.player for p in props})
+            print(f"[fetch] {len(players)} player(s) on the board")
+            source = build_source(
+                args.sport, args.source, client=HttpClient(cache_dir=settings.data.ingest_cache)
+            )
+            seasons = default_seasons(args.sport, args.season_count)
+            written = 0
+            for name in players:
+                try:
+                    fetched = source.fetch(name, seasons)
+                except (LookupError, FetchError) as exc:
+                    print(f"[fetch] skip {name}: {exc}")
+                    continue
+                if fetched.games:
+                    write_logs(fetched, settings.data.gamelogs)
+                    written += 1
+            print(f"[fetch] refreshed {written} player(s) from {source.name}")
+        except Exception as exc:  # noqa: BLE001 - one broken step shouldn't kill the run
+            print(f"[fetch] FAILED: {exc}")
+            failures += 1
+
+    if not args.skip_close:
+        try:
+            with Journal(settings.data.db) as journal:
+                pending = sorted({b.market for b in journal.bets() if b.closing_fair_prob is None})
+                if pending:
+                    provider = build_odds_provider(settings)
+                    props = provider.player_props(args.sport, pending)
+                    updated = journal.record_closing_from_props(props, devig_method=settings.devig.method)
+                    print(f"[close] stamped closing lines on {len(updated)} bet(s)")
+                else:
+                    print("[close] nothing waiting on a closing line")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[close] FAILED: {exc}")
+            failures += 1
+
+    if not args.skip_scan:
+        try:
+            bankroll = args.bankroll
+            if bankroll is None:
+                with Journal(settings.data.db) as journal:
+                    balance = journal.balance()
+                bankroll = balance if balance > 0 else settings.staking.bankroll
+            signals = PropScanner(settings).scan(args.sport, bankroll=bankroll, include_passes=False)
+            print(f"[scan] {len(signals)} bet(s) at bankroll {money(bankroll)}")
+            for sig in signals:
+                print("  " + sig.headline())
+            if args.log and signals:
+                with Journal(settings.data.db) as journal:
+                    ids = [journal.log_signal(s, bankroll=bankroll) for s in signals]
+                print(f"[scan] logged bet(s) {ids}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[scan] FAILED: {exc}")
+            failures += 1
+
+    elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+    print(f"=== done in {elapsed:.1f}s, {failures} step(s) failed")
+    return 1 if failures else 0
 
 
 def cmd_config(args: argparse.Namespace, settings: Settings) -> int:
@@ -678,6 +790,27 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("sources", help="list the game-log sources per sport")
     p.set_defaults(func=cmd_sources)
+
+    # -- serve
+    p = sub.add_parser("serve", help="run the read-only dashboard and JSON API")
+    p.add_argument("--host", default="0.0.0.0")
+    p.add_argument("--port", type=int, help="defaults to $PORT, then 8080")
+    p.add_argument("--token", help="defaults to $PMBOT_API_TOKEN")
+    p.add_argument("--allow-anonymous", action="store_true", help="serve with no auth (private networks only)")
+    p.add_argument("--scan-ttl", type=float, default=300.0, help="seconds to cache a slate scan")
+    p.set_defaults(func=cmd_serve)
+
+    # -- cron
+    p = sub.add_parser("cron", help="one scheduled pass: fetch, close, scan")
+    p.add_argument("--sport", required=True, choices=SPORTS)
+    p.add_argument("--bankroll", type=float, help="defaults to the journal balance")
+    p.add_argument("--log", action="store_true", help="write the recommended bets to the journal")
+    p.add_argument("--skip-fetch", action="store_true")
+    p.add_argument("--skip-scan", action="store_true")
+    p.add_argument("--skip-close", action="store_true")
+    p.add_argument("--source", help="override the game-log source")
+    p.add_argument("--season-count", type=int, default=2)
+    p.set_defaults(func=cmd_cron)
 
     # -- config
     p = sub.add_parser("config", help="show or write the effective configuration")
